@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #08090A; }
+  html { scroll-behavior: smooth; }
+  body { color: #E6E9EA; font-family: Roboto,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  a { color: #32CD32; text-decoration: none; }
+  a:hover { color: #E6E9EA; }
+  ::selection { background: #32CD32; color: #08090A; }
+  body ::-webkit-scrollbar { height: 9px; width: 9px; }
+  body ::-webkit-scrollbar-track { background: #0B0D0E; }
+  body ::-webkit-scrollbar-thumb { background: #23282B; }
+  body ::-webkit-scrollbar-thumb:hover { background: #32CD32; }
+</style>
+</helmet>
+<div style="background:#08090A;min-height:100vh">
+  <header style="position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:14px clamp(16px,4vw,44px);border-bottom:1px solid #191D1F;background:rgba(8,9,10,0.94)">
+    <div style="display:flex;align-items:baseline;gap:10px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;min-width:0">
+      <a href="../Offline AI NPC - Landing.dc.html" style="font-size:13px;font-weight:700;letter-spacing:0.16em;color:#E6E9EA;white-space:nowrap" style-hover="color:#32CD32">OFFLINE&#8202;AI&#8202;NPC</a>
+      <a href="./Documentation.dc.html" style="font-size:11px;letter-spacing:0.14em;color:#6B7275" style-hover="color:#E6E9EA">/ DOCS</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:clamp(12px,2.4vw,24px);font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.14em">
+      <a href="../assets/plugin-docs.pdf" style="color:#9AA1A4" style-hover="color:#E6E9EA">PDF</a>
+      <a href="https://merrymaker14.itch.io/the-interview" target="_blank" rel="noopener" style="color:#9AA1A4" style-hover="color:#E6E9EA">DEMO</a>
+      <a href="../Offline AI NPC - Landing.dc.html#get" style="display:inline-block;padding:7px 13px;border:1px solid #32CD32;color:#32CD32;letter-spacing:0.16em;white-space:nowrap" style-hover="background:#32CD32;color:#08090A">BUY &mdash; $89</a>
+    </div>
+  </header>
+
+  <div style="max-width:1240px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(16px,4vw,44px) 96px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(28px,5vw,64px)">
+    <aside style="flex:0 0 210px;min-width:0;position:sticky;top:76px;display:flex;flex-direction:column;gap:26px;padding-left:12px">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">BEFORE YOU BUY</div>
+          <a href="./IsThisForYourGame.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Is this for your game?</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">GETTING IT RUNNING</div>
+          <a href="./GettingStarted.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Getting started</a>
+          <a href="./BeginnerGuide.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Beginner's guide</a>
+          <a href="./HardwareTiers.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Hardware tiers</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">BUILDING WITH IT</div>
+          <a href="./Dialogue.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Dialogue</a>
+          <a href="./Actions.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Actions</a>
+          <a href="./Languages.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Languages</a>
+          <a href="./InterviewDemo.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">The interview demo</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">WHEN IT BREAKS</div>
+          <a href="./Troubleshooting.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Troubleshooting</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">LICENCES AND HISTORY</div>
+          <a href="./ThirdPartyNotices.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Third-party notices</a>
+          <a href="./VoiceLicences.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Voice licences</a>
+          <a href="./Changelog.dc.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" style-hover="color:#E6E9EA">Changelog</a>
+        </div>
+    </aside>
+    <article style="flex:1 1 min(100%,400px);min-width:0;max-width:78ch">
+      <h1 style="margin:0 0 16px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(24px,3.4vw,36px);letter-spacing:-0.01em;color:#F2F4F5">Documentation</h1>
+      <p style="margin:0;font-size:15px;line-height:1.78;color:#C8CDCF;max-width:64ch;text-wrap:pretty">The same pages that ship inside the package, rendered from the same files. Every latency figure comes from one stated machine and is reproducible with the tools in the download.</p>
+      <div style="display:flex;flex-direction:column;gap:40px;margin-top:48px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#32CD32">BEFORE YOU BUY</span>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F">
+            <a href="./IsThisForYourGame.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Is this for your game?</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">Read this before you buy. It is written to talk the wrong buyer out of the purchase, because a refund and a one-star review cost more than one sale is worth — a&hellip;</span></a>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#32CD32">GETTING IT RUNNING</span>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F">
+            <a href="./GettingStarted.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Getting started</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">From import to a character who answers out loud. Read Is this for your game? first if you have not — it takes two minutes and it is the page most likely to save&hellip;</span></a>
+            <a href="./BeginnerGuide.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Beginner's guide</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">The long way round, assuming you have never installed a Unity package with external dependencies. It starts with an empty project and ends with a build you can &hellip;</span></a>
+            <a href="./HardwareTiers.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Hardware tiers</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">The plugin probes the machine at startup, picks a tier, chooses a model for it, sizes the GPU layer count against the real VRAM budget, and steps down if a load&hellip;</span></a>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#32CD32">BUILDING WITH IT</span>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F">
+            <a href="./Dialogue.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Dialogue: wiring a talking character</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">This is the page that turns the parts into a character: the fifty lines that sit between a microphone and a voice, and what each of them is for.&hellip;</span></a>
+            <a href="./Actions.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Structured actions</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">An NPC reply can carry two things at once: natural speech for the voice, and a machine-reliable decision your game can execute.&hellip;</span></a>
+            <a href="./Languages.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Which languages does this support?</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">There is no single honest number, so this page does not print one. A language needs three things to work — a model that speaks it, recognition that hears it, an&hellip;</span></a>
+            <a href="./InterviewDemo.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">The interview demo</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">A five-minute scene where you question a woman across a desk and decide whether to clear her. She is not on rails: every answer comes from a language model runn&hellip;</span></a>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#32CD32">WHEN IT BREAKS</span>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F">
+            <a href="./Troubleshooting.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Troubleshooting</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">Ordered by how often it happens. Every message below is a string the plugin actually emits — search for it here before searching the internet.&hellip;</span></a>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#32CD32">LICENCES AND HISTORY</span>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F">
+            <a href="./ThirdPartyNotices.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Third-party notices — Offline AI NPC</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">Every third-party component the plugin touches, whether it is bundled with the package, required as a dependency the customer installs, or downloaded at runtime&hellip;</span></a>
+            <a href="./VoiceLicences.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Voice licences — read, not summarised</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">Every card below was opened and read on 2026-07-30, and a dated copy saved in voice-cards-2026-07-30/. Cards change; this folder is the record of what was relie&hellip;</span></a>
+            <a href="./Changelog.dc.html" style="background:#0B0D0E;padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.03em;color:#F2F4F5">Changelog — Offline AI NPC</span><span style="font-size:14px;line-height:1.65;color:#9AA1A4;text-wrap:pretty">All notable changes to the plugin. The format follows Keep a Changelog; versions will start at 1.0.0 when the package is first published.&hellip;</span></a>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:56px;border:1px dashed #23282B;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#FF8C00">NOT ON THE SITE YET</span>
+        <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;max-width:66ch;text-wrap:pretty">ESPEAK_BOUNDARY, Licensing, Limitations, Perception, State &mdash; referenced by the pages above and shipped inside the package, but not on the site yet. Links to them read as plain text rather than breaking.</p>
+      </div>
+    </article>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

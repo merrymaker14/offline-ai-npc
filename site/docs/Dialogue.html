@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dialogue — Offline AI NPC</title>
+<meta name="description" content="A local language model, local speech recognition and local speech synthesis for Unity characters. No cloud, no API keys, no telemetry.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #08090A; }
+  html { scroll-behavior: smooth; }
+  body { color: #E6E9EA; font-family: Roboto,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  a { color: #32CD32; text-decoration: none; }
+  a:hover { color: #E6E9EA; }
+  ::selection { background: #32CD32; color: #08090A; }
+  body ::-webkit-scrollbar { height: 9px; width: 9px; }
+  body ::-webkit-scrollbar-track { background: #0B0D0E; }
+  body ::-webkit-scrollbar-thumb { background: #23282B; }
+  body ::-webkit-scrollbar-thumb:hover { background: #32CD32; }
+</style>
+<style>
+.h1:hover{color:#32CD32}
+.h2:hover{color:#E6E9EA}
+.h3:hover{background:#32CD32;color:#08090A}
+.h4:hover{border-bottom-color:#32CD32}
+.h5:hover{background:#101314}
+</style>
+</head>
+<body>
+<div style="background:#08090A;min-height:100vh">
+  <header style="position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:14px clamp(16px,4vw,44px);border-bottom:1px solid #191D1F;background:rgba(8,9,10,0.94)">
+    <div style="display:flex;align-items:baseline;gap:10px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;min-width:0">
+      <a href="../index.html" style="font-size:13px;font-weight:700;letter-spacing:0.16em;color:#E6E9EA;white-space:nowrap" class="h1">OFFLINE&#8202;AI&#8202;NPC</a>
+      <a href="./Documentation.html" style="font-size:11px;letter-spacing:0.14em;color:#6B7275" class="h2">/ DOCS</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:clamp(12px,2.4vw,24px);font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.14em">
+      <a href="../assets/plugin-docs.pdf" style="color:#9AA1A4" class="h2">PDF</a>
+      <a href="https://merrymaker14.itch.io/the-interview" target="_blank" rel="noopener" style="color:#9AA1A4" class="h2">DEMO</a>
+      <a href="../index.html#get" style="display:inline-block;padding:7px 13px;border:1px solid #32CD32;color:#32CD32;letter-spacing:0.16em;white-space:nowrap" class="h3">BUY &mdash; $89</a>
+    </div>
+  </header>
+
+  <div style="max-width:1240px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(16px,4vw,44px) 96px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(28px,5vw,64px)">
+    <aside style="flex:0 0 210px;min-width:0;position:sticky;top:76px;display:flex;flex-direction:column;gap:26px;padding-left:12px">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">BEFORE YOU BUY</div>
+          <a href="./IsThisForYourGame.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Is this for your game?</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">GETTING IT RUNNING</div>
+          <a href="./GettingStarted.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Getting started</a>
+          <a href="./BeginnerGuide.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Beginner's guide</a>
+          <a href="./HardwareTiers.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Hardware tiers</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">BUILDING WITH IT</div>
+          <a href="./Dialogue.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#32CD32;border-left:2px solid #32CD32;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Dialogue</a>
+          <a href="./Actions.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Actions</a>
+          <a href="./Languages.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Languages</a>
+          <a href="./InterviewDemo.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">The interview demo</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">WHEN IT BREAKS</div>
+          <a href="./Troubleshooting.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Troubleshooting</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">LICENCES AND HISTORY</div>
+          <a href="./ThirdPartyNotices.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Third-party notices</a>
+          <a href="./VoiceLicences.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Voice licences</a>
+          <a href="./Changelog.html" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:#9AA1A4;border-left:2px solid transparent;padding:2px 0 2px 10px;margin-left:-12px" class="h2">Changelog</a>
+        </div>
+    </aside>
+    <article style="flex:1 1 min(100%,400px);min-width:0;max-width:78ch">
+<h1 style="margin:0 0 20px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(23px,3.2vw,34px);line-height:1.2;letter-spacing:-0.01em;color:#F2F4F5;text-wrap:pretty">Dialogue: wiring a talking character</h1><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">This is the page that turns the parts into a character: the fifty lines that sit between a microphone and a voice, and what each of them is for.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Everything below is the working controller, not a sketch. Where a line has a trap in it, the trap is marked at the line.</p><h2 id="the-shape" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:#F2F4F5;text-wrap:pretty">The shape</h2><pre style="margin:24px 0;padding:18px 20px;background:#0B0D0E;border:1px solid #191D1F;border-left:2px solid #23282B;overflow-x:auto;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.7;color:#C8CDCF;white-space:pre">player speaks ──▶ speech-to-text ──▶ your LLM call (streamed)
+                                          │
+                                          ▼
+                              StreamingReplyParser
+                              splits into speakable units
+                                          │
+                        ┌─────────────────┴─────────────────┐
+                        ▼                                   ▼
+                 SpeakableText.Sanitize              subtitle (verbatim)
+                        │
+                        ▼
+                StreamingSpeechSession ──▶ AudioSource</pre><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Two things about this diagram matter more than they look.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500">The reply is split into sentences and spoken as they arrive.</strong> Waiting for the whole reply costs 2.4 s to first audio on the reference machine; speaking from the first finished sentence costs 2.0 s. That is the difference between the two figures quoted everywhere in this documentation, and it is why the parser exists.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500">The voice and the subtitle get different text.</strong> An emoji is fine to read and impossible to speak. <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">SpeakableText.Sanitize</code> strips what a synthesiser cannot say — emoji, markdown marks, control characters — and leaves every language's punctuation alone. The subtitle gets the original.</p><h2 id="the-whole-controller" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:#F2F4F5;text-wrap:pretty">The whole controller</h2><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Minus your project's specifics. It compiles against the public API and nothing else.</p><pre style="margin:24px 0;padding:18px 20px;background:#0B0D0E;border:1px solid #191D1F;border-left:2px solid #23282B;overflow-x:auto;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.7;color:#C8CDCF;white-space:pre">using System;
+using System.Collections;
+using UnityEngine;
+using OfflineAINPC.Core;
+using OfflineAINPC.Speech;
+
+public sealed class TalkingCharacter : MonoBehaviour
+{
+    [SerializeField] private AudioSource _voice;
+    [SerializeField] private int _speakerId;          // which voice, when the engine has several
+
+    private StreamingReplyParser _parser;
+    private StreamingSpeechSession _speech;
+    private bool _busy;
+
+    /// &lt;summary&gt;One turn: the player said something, the character answers.&lt;/summary&gt;
+    public IEnumerator Say(string playerLine)
+    {
+        // ONE lock, released on every exit path. Getting this wrong is how push-to-talk
+        // stops working forever; a `finally` is not optional here.
+        if (_busy) yield break;
+        _busy = true;
+
+        try
+        {
+            _parser = new StreamingReplyParser();
+            _speech = new StreamingSpeechSession(
+                engine:    () =&gt; TTSEngineManager.Instance != null ? TTSEngineManager.Instance.Active : null,
+                audio:     _voice,
+                speakerId: _speakerId,
+                onSubtitle: (text, seconds) =&gt; ShowSubtitle(text, seconds),
+                onWarning:  message =&gt; Debug.LogWarning(message));
+
+            StartCoroutine(_speech.RunSynthesis());
+            StartCoroutine(_speech.RunPlayback());
+
+            // YOUR llm call goes here. Feed what the callback gives you to the parser and
+            // hand every finished unit to the speech session.
+            //
+            // MIND WHICH ONE YOUR BACKEND GIVES YOU. LLMUnity's stream callback is
+            // CUMULATIVE — every invocation carries the whole reply so far — so it needs
+            // AppendCumulative. A backend that streams true deltas needs Append. Getting
+            // this backwards is silent and unmistakable: the character says
+            // "MMaraMara VMara VeyMara Vey, 34." instead of "Mara Vey, 34."
+            yield return GenerateReply(playerLine, onToken: textSoFar =&gt;
+            {
+                _parser.AppendCumulative(textSoFar);       // LLMUnity: cumulative
+                // _parser.Append(delta);                  // a backend that streams deltas
+                while (_parser.TryDequeueUnit(out var unit)) _speech.Enqueue(unit);
+            });
+
+            _parser.Complete();
+            while (_parser.TryDequeueUnit(out var unit)) _speech.Enqueue(unit);
+            _speech.InputComplete();
+
+            while (!_speech.Finished) yield return null;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void ShowSubtitle(string text, float seconds) { /* your UI */ }
+
+    private IEnumerator GenerateReply(string playerLine, Action&lt;string&gt; onToken)
+    {
+        // LLMUnity, your own binding, or a stub. The plugin does not care which.
+        yield break;
+    }
+}</pre><h3 id="the-parts-you-must-not-skip" style="margin:34px 0 14px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:15px;line-height:1.45;letter-spacing:0.04em;color:#E6E9EA;text-wrap:pretty">The parts you must not skip</h3><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">_busy</code> released in a <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">finally</code>.</strong> Every early return, every exception, every cancelled coroutine has to clear it. This project has broken push-to-talk this way more than once: the symptom is that the character simply stops responding, with nothing in the console.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">InputComplete()</code>.</strong> Without it the synthesis loop waits forever for a unit that is never coming, and the character never finishes speaking.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500">A null engine is normal.</strong> The engine reference is a <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Func&lt;&gt;</code> and not a stored reference because the engine is replaced when the language changes. During that switch it is null; the session handles it by delivering the line to the subtitle only. Do not assume it is there.</p><h2 id="the-prompt-cache" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:#F2F4F5;text-wrap:pretty">The prompt cache</h2><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">The system prompt is cached by the inference engine. A stable prompt means fast replies; a prompt that changes every turn pays the cold cost — about 2.1 s here — every time.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500">So: build the prompt once, at <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Start</code>, and re-build it only when something real changed</strong> — the language, the character's persona, a new ambient fact. Never per turn.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">That is also why per-turn context (what the character can currently see, who is nearby) is appended to the <em style="color:#E6E9EA;font-style:italic">user</em> message rather than folded into the system prompt: it changes constantly, and putting it in the cached half would throw the cache away every turn.</p><h2 id="memory" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:#F2F4F5;text-wrap:pretty">Memory</h2><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">NPCMemory</code> keeps a rolling window of the conversation, keyed per character, over a store you choose — so it survives scene loads and restarts once you give it one that persists.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><strong style="color:#F2F4F5;font-weight:500">The whole of it is three calls.</strong> Pick a store on the first line, and never think about persistence again:</p><pre style="margin:24px 0;padding:18px 20px;background:#0B0D0E;border:1px solid #191D1F;border-left:2px solid #23282B;overflow-x:auto;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.7;color:#C8CDCF;white-space:pre">using OfflineAINPC.Memory;
+
+NPCMemory.Store = new PlayerPrefsStore();        // ships with the plugin; one line, done
+
+NPCMemory.Append(npcId, NPCMemory.RoleUser, playerLine);
+NPCMemory.Append(npcId, NPCMemory.RoleNpc,  reply);
+
+string replay = NPCMemory.GetContextString(npcId, lastN: 10);</pre><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Fold <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">replay</code> into the system prompt when you build it. The window is deliberately small: every remembered turn is prompt tokens on every subsequent turn, and a 4B model's attention does not reward a long transcript.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Do that assignment once, at startup, before anything talks. Without a store <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">NPCMemory</code> still works and simply forgets on quit — check <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">NPCMemory.HasStore</code> if you want to be sure which of the two you have.</p><h3 id="choosing-a-store" style="margin:34px 0 14px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:15px;line-height:1.45;letter-spacing:0.04em;color:#E6E9EA;text-wrap:pretty">Choosing a store</h3><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">PlayerPrefsStore</code> is the right first choice and the wrong last one. It is a small global blob with no save slots and no encryption, which is fine for a demo and wrong for a game that already knows how to save.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Anything else is three methods — <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Get</code>, <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Set</code>, <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Delete</code> — against <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">IKeyValueStore</code>. Here is a complete one that writes JSON files under <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Application.persistentDataPath</code>, per save slot:</p><pre style="margin:24px 0;padding:18px 20px;background:#0B0D0E;border:1px solid #191D1F;border-left:2px solid #23282B;overflow-x:auto;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.7;color:#C8CDCF;white-space:pre">using System.IO;
+using OfflineAINPC.Memory;
+using UnityEngine;
+
+public sealed class FileStore : IKeyValueStore
+{
+    private readonly string _dir;
+
+    public FileStore(string slot = "slot0")
+    {
+        _dir = Path.Combine(Application.persistentDataPath, "npc-memory", slot);
+        Directory.CreateDirectory(_dir);
+    }
+
+    // Keys arrive as "memory_&lt;npcId&gt;", so they are already safe file names — but a game
+    // that invents its own ids should still sanitise, not trust.
+    private string PathOf(string key) =&gt; Path.Combine(_dir, key + ".json");
+
+    public string Get(string key)
+    {
+        string path = PathOf(key);
+        return File.Exists(path) ? File.ReadAllText(path) : "";
+    }
+
+    public void Set(string key, string value) =&gt; File.WriteAllText(PathOf(key), value);
+
+    public void Delete(string key)
+    {
+        string path = PathOf(key);
+        if (File.Exists(path)) File.Delete(path);
+    }
+}</pre><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">NPCMemory.Store = new FileStore(currentSlot);</code> and memory follows the save slot. The same three methods reach a database, a cloud save, or the dictionary a test uses:</p><pre style="margin:24px 0;padding:18px 20px;background:#0B0D0E;border:1px solid #191D1F;border-left:2px solid #23282B;overflow-x:auto;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.7;color:#C8CDCF;white-space:pre">// In tests: no files, no PlayerPrefs, nothing left behind.
+public sealed class MemoryStore : IKeyValueStore
+{
+    private readonly Dictionary&lt;string, string&gt; _map = new Dictionary&lt;string, string&gt;();
+    public string Get(string key) =&gt; _map.TryGetValue(key, out var v) ? v : "";
+    public void Set(string key, string value) =&gt; _map[key] = value;
+    public void Delete(string key) =&gt; _map.Remove(key);
+}</pre><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">The store is asked for a value once per character per turn, not per frame, so a store that touches disk is not a performance decision.</p><h3 id="what-it-keeps-and-what-it-costs" style="margin:34px 0 14px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:15px;line-height:1.45;letter-spacing:0.04em;color:#E6E9EA;text-wrap:pretty">What it keeps, and what it costs</h3><div style="overflow-x:auto;margin:24px 0;border:1px solid #191D1F;background:#0B0D0E"><table style="border-collapse:collapse;width:100%"><tbody><tr><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#E6E9EA;border-top:1px solid #191D1F;vertical-align:top"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Append(npcId, role, text)</code></td><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#C8CDCF;border-top:1px solid #191D1F;vertical-align:top">adds one line; roles are <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">RoleUser</code>, <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">RoleNpc</code>, <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">RoleOther</code>, <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">RoleSummary</code></td></tr><tr><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#E6E9EA;border-top:1px solid #191D1F;vertical-align:top"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">GetContextString(npcId, lastN)</code></td><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#C8CDCF;border-top:1px solid #191D1F;vertical-align:top">the last <code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">lastN</code> <strong style="color:#F2F4F5;font-weight:500">exchanges</strong>, formatted for a prompt</td></tr><tr><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#E6E9EA;border-top:1px solid #191D1F;vertical-align:top"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Clear(npcId)</code></td><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#C8CDCF;border-top:1px solid #191D1F;vertical-align:top">forgets that character, store included</td></tr><tr><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#E6E9EA;border-top:1px solid #191D1F;vertical-align:top"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">MaxEntries</code></td><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#C8CDCF;border-top:1px solid #191D1F;vertical-align:top">40 lines per character — older lines fall off the end</td></tr><tr><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#E6E9EA;border-top:1px solid #191D1F;vertical-align:top"><code style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:0.88em;background:#121517;border:1px solid #191D1F;padding:1px 5px;color:#E6E9EA">Compactor</code></td><td style="padding:13px 15px;font-size:14px;line-height:1.6;color:#C8CDCF;border-top:1px solid #191D1F;vertical-align:top">optional: your own summariser, called when the window overflows</td></tr></tbody></table></div><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Two lines per exchange, forty entries: about twenty turns per character before the oldest starts dropping. Raise it and every turn costs more prompt tokens; that is the whole trade-off, and it is why the default is a number rather than "everything".</p><h2 id="voices" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:#F2F4F5;text-wrap:pretty">Voices</h2><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">The language decides the default voice (<a href="./Languages.html" style="color:#32CD32;border-bottom:1px solid #1F3D22" class="h4">Languages</a>). A character overrides it by speaker id — that is how two English speakers in one scene sound different. With Piper, each voice is a separate process, spawned lazily; with VOICEVOX, a speaker id on one server.</p><p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:#C8CDCF;text-wrap:pretty">Spawn the voices you will need up front rather than on the first line. A Piper process takes about 1.3 s to come up, and paying that mid-scene is an audible silence.</p><h2 id="what-this-page-does-not-cover" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:#F2F4F5;text-wrap:pretty">What this page does not cover</h2><ul style="margin:18px 0;padding-left:22px;color:#C8CDCF;font-size:15px;line-height:1.75"><li style="margin:0 0 10px"><strong style="color:#F2F4F5;font-weight:500">Speech recognition</strong> — see <a href="./GettingStarted.html#6-speech-recognition" style="color:#32CD32;border-bottom:1px solid #1F3D22" class="h4">GettingStarted</a>.</li><li style="margin:0 0 10px"><strong style="color:#F2F4F5;font-weight:500">Actions</strong> (the character doing rather than saying) — see <a href="./Actions.html" style="color:#32CD32;border-bottom:1px solid #1F3D22" class="h4">Actions</a>.</li><li style="margin:0 0 10px"><strong style="color:#F2F4F5;font-weight:500">Perception</strong> (the character knowing what is around her) — see <span title="Ships inside the package; not on the site yet" style="color:#6B7275;border-bottom:1px dotted #23282B">Perception</span>.</li><li style="margin:0 0 10px"><strong style="color:#F2F4F5;font-weight:500">Lip sync.</strong> Not included; the demo project drives a jaw bone itself.</li></ul>
+      <div style="display:flex;flex-wrap:wrap;gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:64px"><a href="./HardwareTiers.html" style="flex:1 1 200px;background:#0B0D0E;padding:18px 20px;display:flex;flex-direction:column;gap:7px" class="h5"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">&larr; PREVIOUS</span><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:#E6E9EA">Hardware tiers</span></a><a href="./Actions.html" style="flex:1 1 200px;background:#0B0D0E;padding:18px 20px;display:flex;flex-direction:column;gap:7px;text-align:right;align-items:flex-end" class="h5"><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#4A5053">NEXT &rarr;</span><span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:#E6E9EA">Actions</span></a></div>
+    </article>
+  </div>
+</div>
+</body>
+</html>

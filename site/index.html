@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline AI NPC — conversational NPCs that run locally</title>
+<meta name="description" content="A local language model, local speech recognition and local speech synthesis for Unity characters. No cloud, no API keys, no telemetry.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #08090A; overflow-x: hidden; }
+  body { color: #E6E9EA; font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; font-feature-settings: "kern" 1; }
+  a { color: #E6E9EA; text-decoration: none; }
+  a:hover { color: #32CD32; }
+  ::selection { background: #32CD32; color: #08090A; }
+  @keyframes blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+  @keyframes breathe { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
+</style>
+<style>
+.h1:hover{color:#E6E9EA}
+.h2:hover{background:#32CD32;color:#08090A}
+.h3:hover{background:#08090A;color:#32CD32}
+.h4:hover{border-color:#E6E9EA}
+.h5:hover{border-bottom-color:#32CD32}
+.h6:hover{color:#32CD32}
+.h7:hover{color:#32CD32;border-bottom-color:#32CD32}
+</style>
+</head>
+<body>
+<div style="background:#08090A;color:#E6E9EA;min-height:100vh;padding-bottom:64px;position:relative;overflow:hidden">
+
+  <header style="position:relative;z-index:3;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(16px,4vw,44px);border-bottom:1px solid #191D1F">
+    <div style="display:flex;align-items:baseline;gap:10px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace">
+      <span style="font-size:14px;font-weight:700;letter-spacing:0.16em;color:#E6E9EA;white-space:nowrap">OFFLINE&#8202;AI&#8202;NPC</span>
+      <span style="font-size:11px;letter-spacing:0.14em;color:#5F6669">/ PLUGIN FOR YOUR ENGINE</span>
+    </div>
+    <nav style="display:flex;flex-wrap:wrap;align-items:center;gap:clamp(14px,2.4vw,28px);font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.14em">
+      <a href="#measured" style="color:#9AA1A4" class="h1">MEASURED</a>
+      <a href="#limits" style="color:#9AA1A4" class="h1">LIMITS</a>
+      <a href="./docs/Documentation.html" style="color:#9AA1A4" class="h1">DOCS</a>
+      <a href="#get" style="display:inline-block;padding:8px 14px;border:1px solid #32CD32;color:#32CD32;letter-spacing:0.16em" class="h2">BUY &mdash; $89</a>
+    </nav>
+  </header>
+
+  <section style="position:relative;overflow:hidden;border-bottom:1px solid #191D1F">
+    <div style="position:relative;z-index:2;width:100%;max-width:1240px;margin:0 auto;padding:clamp(40px,7vw,84px) clamp(16px,4vw,44px) 0;display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(26px,5vw,60px)">
+      <div style="flex:1 1 min(100%,380px);min-width:0">
+      <div style="display:flex;align-items:center;gap:10px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#5F6669;margin-bottom:clamp(20px,3vw,32px)">
+        <span style="width:7px;height:7px;background:#32CD32;display:inline-block;animation:breathe 2.4s ease-in-out infinite"></span>
+        <span>RUNS ON THE PLAYER&rsquo;S MACHINE</span>
+      </div>
+      <h1 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;font-size:clamp(27px,4.6vw,54px);line-height:1.1;letter-spacing:-0.015em;color:#F2F4F5;max-width:17ch;text-wrap:pretty">NPCs that hear you, answer, and remember.</h1>
+      <p style="margin:clamp(18px,2.6vw,26px) 0 0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(13px,1.5vw,17px);line-height:1.5;letter-spacing:0.01em;color:#32CD32;max-width:34ch">On the player&rsquo;s machine. Nowhere else.</p>
+      <p style="margin:clamp(20px,3vw,28px) 0 0;font-size:clamp(14px,1.35vw,16px);line-height:1.65;color:#9AA1A4;max-width:56ch;text-wrap:pretty">A local language model, local speech recognition, local speech synthesis and per-character memory, shipped as a plugin for your engine. No cloud, no API keys, no per-token cost, no telemetry. Nothing leaves the machine, because there is nowhere for it to go.</p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:clamp(28px,4vw,40px)">
+        <a href="#get" style="display:inline-flex;align-items:center;gap:12px;padding:15px 22px;border:1px solid #32CD32;background:#32CD32;color:#08090A;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:700;letter-spacing:0.16em" class="h3">BUY &mdash; 89 USD</a>
+        <a href="https://merrymaker14.itch.io/the-interview" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:12px;padding:15px 22px;border:1px solid #2C3234;color:#E6E9EA;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:500;letter-spacing:0.16em" class="h4">PLAY THE DEMO</a>
+        </div>
+      </div>
+      <div style="flex:0 1 min(100%,404px);min-width:0;display:flex;flex-direction:column;gap:9px">
+        <div style="position:relative;aspect-ratio:2/3;background:#08090A">
+          <img src="./assets/hero-key.jpg" alt="Three scenes from games running the plugin, each with the character's spoken line as a subtitle" style="display:block;width:100%;height:100%;object-fit:cover" />
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;z-index:2;width:100%;max-width:1240px;margin:clamp(44px,7vw,84px) auto 0;padding:0 clamp(16px,4vw,44px)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:1px;background:#191D1F;border-top:1px solid #191D1F;border-bottom:1px solid #191D1F">
+        <div style="background:#08090A;padding:18px 20px 20px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#5F6669;margin-bottom:10px">MEDIAN TO FIRST SPOKEN AUDIO</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(22px,2.6vw,30px);font-weight:500;color:#F2F4F5;letter-spacing:-0.01em">2.0<span style="font-size:14px;color:#9AA1A4;margin-left:6px">s</span></div>
+        </div>
+        <div style="background:#08090A;padding:18px 20px 20px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#5F6669;margin-bottom:10px">REFERENCE MACHINE</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.5;color:#C8CDCF">RTX 3060 Laptop<br />6 GB VRAM</div>
+        </div>
+        <div style="background:#08090A;padding:18px 20px 20px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#5F6669;margin-bottom:10px">MODEL</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.5;color:#C8CDCF">Qwen3-4B<br />36 / 36 layers on GPU</div>
+        </div>
+        <div style="background:#08090A;padding:18px 20px 20px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#5F6669;margin-bottom:10px">NETWORK CALLS</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(22px,2.6vw,30px);font-weight:500;color:#32CD32;letter-spacing:-0.01em">0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main style="position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,44px)">
+
+    <section id="measured" style="padding:clamp(56px,9vw,110px) 0 0">
+      <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid #191D1F;padding-bottom:14px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#32CD32">[ 01 ]</span>
+        <h2 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(15px,1.8vw,19px);font-weight:500;letter-spacing:0.14em;color:#E6E9EA">MEASURED, NOT CLAIMED</h2>
+      </div>
+      <p style="margin:20px 0 0;font-size:clamp(14px,1.3vw,15px);line-height:1.7;color:#9AA1A4;max-width:62ch;text-wrap:pretty">Every figure below comes from one stated machine. The comparison that matters is the lower two rows below: same measurement mode, so the difference between them is contention and nothing else.</p>
+
+      <div style="margin-top:clamp(28px,4vw,44px);border:1px solid #191D1F;background:#0B0D0E;padding:clamp(20px,3vw,32px)">
+        <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px">
+          <div>
+            <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#6B7275;margin-bottom:14px">MEDIAN TO FIRST SPOKEN AUDIO &mdash; ONE CHARACTER</div>
+            <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(40px,7vw,76px);font-weight:300;line-height:0.95;letter-spacing:-0.03em;color:#F2F4F5">2.0<span style="font-size:clamp(16px,2vw,22px);color:#6B7275;margin-left:10px;letter-spacing:0">s</span></div>
+          </div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.9;color:#9AA1A4;text-align:right">
+            <div>Qwen3-4B Q4_K_M &middot; <span style="color:#E6E9EA">36 / 36 layers</span></div>
+            <div>tier Standard &middot; <span style="color:#E6E9EA">36 tok/s</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:clamp(30px,4vw,44px);display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px">
+            <div style="flex:0 1 clamp(150px,25%,240px);min-width:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;letter-spacing:0.04em;color:#9AA1A4">One character, shipping path</div>
+            <div style="flex:1 1 min(100%,180px);min-width:0;display:flex;align-items:center;gap:12px">
+              <div style="flex:1 1 auto;height:14px;background:#0F1213;border:1px solid #191D1F;position:relative">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:15.7%;background:rgba(50,205,50,0.18);border-right:2px solid #32CD32"></div>
+              </div>
+              <div style="flex:0 0 78px;text-align:right;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;color:#F2F4F5;letter-spacing:-0.01em">2.0 s</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px">
+            <div style="flex:0 1 clamp(150px,25%,240px);min-width:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;letter-spacing:0.04em;color:#9AA1A4">One character, whole reply</div>
+            <div style="flex:1 1 min(100%,180px);min-width:0;display:flex;align-items:center;gap:12px">
+              <div style="flex:1 1 auto;height:14px;background:#0F1213;border:1px solid #191D1F;position:relative">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:18.9%;background:rgba(50,205,50,0.18);border-right:2px solid #32CD32"></div>
+              </div>
+              <div style="flex:0 0 78px;text-align:right;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;color:#F2F4F5;letter-spacing:-0.01em">2.4 s</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px">
+            <div style="flex:0 1 clamp(150px,25%,240px);min-width:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;letter-spacing:0.04em;color:#E6E9EA">Whole reply, others generating</div>
+            <div style="flex:1 1 min(100%,180px);min-width:0;display:flex;align-items:center;gap:12px">
+              <div style="flex:1 1 auto;height:14px;background:#0F1213;border:1px solid #191D1F;position:relative">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:100%;background:rgba(255,140,0,0.20);border-right:2px solid #FF8C00"></div>
+              </div>
+              <div style="flex:0 0 78px;text-align:right;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;color:#FF8C00;letter-spacing:-0.01em">12.7 s</div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid #191D1F;font-size:13px;line-height:1.7;color:#8B9295;max-width:70ch;text-wrap:pretty">Rows two and three are measured the same way, so the gap between them is the queue and nothing else: <span style="color:#E6E9EA">background conversation costs roughly 5&times;</span>. Row one is the path a shipping game takes, where speech begins at the first finished sentence instead of at the end of the reply. No amount of tuning removes the 5&times; &mdash; throttle background conversation while the player is speaking.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,268px),1fr));gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:1px">
+        <div style="background:#0B0D0E;padding:clamp(18px,2.4vw,26px);display:flex;flex-direction:column;gap:14px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#6B7275">FIRST TURN OF A SESSION</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(26px,3vw,34px);font-weight:300;color:#FF8C00;letter-spacing:-0.02em">2.1<span style="font-size:14px;color:#6B7275;margin-left:6px;letter-spacing:0">s</span></div>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#8B9295">The prompt cache is still filling. It happens once per session, and it is measured rather than excused.</p>
+        </div>
+        <div style="background:#0B0D0E;padding:clamp(18px,2.4vw,26px);display:flex;flex-direction:column;gap:14px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#6B7275">DEPARTURES FROM STATED FACTS</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(26px,3vw,34px);font-weight:300;color:#F2F4F5;letter-spacing:-0.02em">0 <span style="color:#4A5053">/</span> 320</div>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#8B9295">Twenty sessions of sixteen turns on the reference machine. She is a reliable witness to what she was told &mdash; ask her to compute something and that is a different story.</p>
+        </div>
+        <div style="background:#0B0D0E;padding:clamp(18px,2.4vw,26px);display:flex;flex-direction:column;gap:14px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em;color:#6B7275">STATE COLOURS HER SPEECH</div>
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(26px,3vw,34px);font-weight:300;color:#F2F4F5;letter-spacing:-0.02em">6 <span style="color:#4A5053">in</span> 10</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            <span style="width:14px;height:14px;background:#32CD32;display:block"></span>
+            <span style="width:14px;height:14px;background:#32CD32;display:block"></span>
+            <span style="width:14px;height:14px;background:#32CD32;display:block"></span>
+            <span style="width:14px;height:14px;background:#32CD32;display:block"></span>
+            <span style="width:14px;height:14px;background:#32CD32;display:block"></span>
+            <span style="width:14px;height:14px;background:#32CD32;display:block"></span>
+            <span style="width:14px;height:14px;background:#23282B;display:block"></span>
+            <span style="width:14px;height:14px;background:#23282B;display:block"></span>
+            <span style="width:14px;height:14px;background:#23282B;display:block"></span>
+            <span style="width:14px;height:14px;background:#23282B;display:block"></span>
+          </div>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#8B9295">State descriptors reach the line about six times in ten. With the system off: zero.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;border:1px solid #1F3D22;background:rgba(50,205,50,0.05);padding:18px clamp(18px,2.4vw,26px);margin-top:1px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.18em;color:#32CD32;font-weight:700">EXACT, EVERY TIME</span>
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:#9AA1A4;letter-spacing:0.06em">threshold events &nbsp;&middot;&nbsp; traits &nbsp;&middot;&nbsp; save / load</span>
+      </div>
+    </section>
+
+    <section style="padding:clamp(56px,9vw,110px) 0 0">
+      <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid #191D1F;padding-bottom:14px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#32CD32">[ 02 ]</span>
+        <h2 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(15px,1.8vw,19px);font-weight:500;letter-spacing:0.14em;color:#E6E9EA">THREE THINGS THAT ARE DIFFERENT</h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:clamp(28px,4vw,44px)">
+        <div style="background:#0B0D0E;padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:16px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#6B7275">01</div>
+          <h3 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.06em;color:#F2F4F5">FULLY OFFLINE</h3>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;text-wrap:pretty">Model, recognition, synthesis and memory all run in the player&rsquo;s process. Pull the network cable mid-conversation and nothing changes. No key to provision, no rate limit, no per-token bill, no vendor who can deprecate your characters.</p>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:auto">
+            <div style="display:flex;justify-content:space-between;gap:12px;background:#0B0D0E;padding:11px 13px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em"><span style="color:#6B7275">PER-CALL COST</span><span style="color:#32CD32">0</span></div>
+            <div style="display:flex;justify-content:space-between;gap:12px;background:#0B0D0E;padding:11px 13px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em"><span style="color:#6B7275">API KEYS</span><span style="color:#32CD32">none</span></div>
+            <div style="display:flex;justify-content:space-between;gap:12px;background:#0B0D0E;padding:11px 13px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em"><span style="color:#6B7275">TELEMETRY</span><span style="color:#32CD32">none</span></div>
+          </div>
+        </div>
+
+        <div style="background:#0B0D0E;padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:16px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#6B7275">02</div>
+          <h3 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.06em;color:#F2F4F5">MULTILINGUAL, WITH THE FINE PRINT</h3>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;text-wrap:pretty">The three layers do not cover the same set of languages, so here is each one separately. One voice ships, and it is English &mdash; public domain, nothing to clear. Everywhere else the model and the recognition are already there and you supply the voice file: one asset, no code.</p>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:auto">
+            <div style="display:flex;justify-content:space-between;gap:12px;background:#0B0D0E;padding:11px 13px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em"><span style="color:#6B7275">LANGUAGE MODEL</span><span style="color:#E6E9EA">100+</span></div>
+            <div style="display:flex;justify-content:space-between;gap:12px;background:#0B0D0E;padding:11px 13px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em"><span style="color:#6B7275">RECOGNITION</span><span style="color:#E6E9EA">~100</span></div>
+            <div style="display:flex;justify-content:space-between;gap:12px;background:#0B0D0E;padding:11px 13px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em"><span style="color:#6B7275">BUNDLED VOICE</span><a href="./docs/Languages.html" style="color:#FF8C00;border-bottom:1px solid #4A3A1C">English &mdash; the rest &rarr;</a></div>
+          </div>
+        </div>
+
+        <div style="background:#0B0D0E;padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:16px">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#6B7275">03</div>
+          <h3 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:500;letter-spacing:0.06em;color:#F2F4F5">ALREADY SHIPPED IN A VR GAME</h3>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;text-wrap:pretty">This is not a demo looking for a product. A shipped VR title runs on it, with players talking to characters on their own hardware &mdash; which is where the numbers on this page come from.</p>
+          <div style="margin-top:auto;padding-top:8px"><a href="https://merrymaker14.itch.io/the-interview" target="_blank" rel="noopener" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.14em;color:#32CD32;border-bottom:1px solid #1F3D22;padding-bottom:3px" class="h5">PLAY THE DEMO &rarr;</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:clamp(56px,9vw,110px) 0 0">
+      <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid #191D1F;padding-bottom:14px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#32CD32">[ 03 ]</span>
+        <h2 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(15px,1.8vw,19px);font-weight:500;letter-spacing:0.14em;color:#E6E9EA">PERCEPTION, OFF AND ON</h2>
+      </div>
+      <p style="margin:20px 0 0;font-size:clamp(14px,1.3vw,15px);line-height:1.7;color:#9AA1A4;max-width:62ch;text-wrap:pretty">Same scene, same question, same character. The only difference is whether she can see the room she is standing in.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,258px),1fr));gap:clamp(14px,2vw,24px);margin-top:clamp(28px,4vw,44px)">
+        <div style="border:1px solid #191D1F;background:#0B0D0E">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em">
+            <span style="color:#FF3B2F">&#9679; PERCEPTION OFF</span>
+            <span style="color:#6B7275">CLIP A</span>
+          </div>
+          <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,#0D0F10 0px,#0D0F10 7px,#0A0C0D 7px,#0A0C0D 14px)">
+            <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.24em;color:#4A5053">[ CLIP PENDING ]</span>
+          </div>
+          <p style="margin:0;padding:16px 14px 18px;font-size:14px;line-height:1.65;color:#9AA1A4">She invents a fireplace, a window seat and a cat. None of them exist.</p>
+        </div>
+        <div style="border:1px solid #1F3D22;background:#0B0D0E">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid #1F3D22;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.18em">
+            <span style="color:#32CD32">&#9679; PERCEPTION ON</span>
+            <span style="color:#6B7275">CLIP B</span>
+          </div>
+          <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,#0D0F10 0px,#0D0F10 7px,#0A0C0D 7px,#0A0C0D 14px)">
+            <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.24em;color:#4A5053">[ CLIP PENDING ]</span>
+          </div>
+          <p style="margin:0;padding:16px 14px 18px;font-size:14px;line-height:1.65;color:#9AA1A4">She speaks only about what is in the room.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="limits" style="padding:clamp(56px,9vw,110px) 0 0">
+      <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid #191D1F;padding-bottom:14px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#FF3B2F">[ 04 ]</span>
+        <h2 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(15px,1.8vw,19px);font-weight:500;letter-spacing:0.14em;color:#E6E9EA">WHAT IT DOES NOT DO</h2>
+      </div>
+      <p style="margin:20px 0 0;font-size:clamp(14px,1.3vw,15px);line-height:1.7;color:#9AA1A4;max-width:62ch;text-wrap:pretty">Three limits worth knowing before the purchase rather than after it.</p>
+
+      <div style="display:flex;flex-direction:column;gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:clamp(28px,4vw,44px)">
+        <div style="background:#0B0D0E;padding:clamp(20px,2.6vw,28px);display:flex;flex-wrap:wrap;gap:clamp(12px,2vw,32px);align-items:baseline">
+          <div style="display:flex;align-items:center;gap:12px;flex:0 1 clamp(170px,22%,250px)"><span style="width:3px;height:16px;background:#FF3B2F;display:block;flex:none"></span><h3 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;font-weight:500;letter-spacing:0.1em;color:#F2F4F5">DESKTOP ONLY</h3></div>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;flex:1 1 min(100%,380px);min-width:0;text-wrap:pretty">It needs a desktop GPU and desktop memory. There is no phone build and no cloud fallback to hide behind &mdash; that absence is the point of the product.</p>
+        </div>
+        <div style="background:#0B0D0E;padding:clamp(20px,2.6vw,28px);display:flex;flex-wrap:wrap;gap:clamp(12px,2vw,32px);align-items:baseline">
+          <div style="display:flex;align-items:center;gap:12px;flex:0 1 clamp(170px,22%,250px)"><span style="width:3px;height:16px;background:#FF3B2F;display:block;flex:none"></span><h3 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;font-weight:500;letter-spacing:0.1em;color:#F2F4F5">ONE INFERENCE QUEUE</h3></div>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;flex:1 1 min(100%,380px);min-width:0;text-wrap:pretty">Every character shares one queue on one GPU. A tavern of six people all answering at once is not what this does; a scene with one or two speaking characters is. The 12.7 s figure above is that contention, measured.</p>
+        </div>
+        <div style="background:#0B0D0E;padding:clamp(20px,2.6vw,28px);display:flex;flex-wrap:wrap;gap:clamp(12px,2vw,32px);align-items:baseline">
+          <div style="display:flex;align-items:center;gap:12px;flex:0 1 clamp(170px,22%,250px)"><span style="width:3px;height:16px;background:#FF3B2F;display:block;flex:none"></span><h3 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;font-weight:500;letter-spacing:0.1em;color:#F2F4F5">PROBABILISTIC OUTPUT</h3></div>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;flex:1 1 min(100%,380px);min-width:0;text-wrap:pretty">It will not deliver an authored line word for word. If a beat has to land exactly, script that line and let the model handle everything around it. Threshold events, traits and save / load are the deterministic half.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="get" style="padding:clamp(56px,9vw,110px) 0 0">
+      <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid #191D1F;padding-bottom:14px">
+        <span style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.2em;color:#32CD32">[ 05 ]</span>
+        <h2 style="margin:0;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(15px,1.8vw,19px);font-weight:500;letter-spacing:0.14em;color:#E6E9EA">GET IT</h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,258px),1fr));gap:1px;background:#191D1F;border:1px solid #191D1F;margin-top:clamp(28px,4vw,44px)">
+        <div style="background:#0B0D0E;padding:clamp(24px,3.4vw,38px);display:flex;flex-direction:column;gap:18px;justify-content:center">
+          <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(38px,6vw,64px);font-weight:300;letter-spacing:-0.03em;color:#F2F4F5;line-height:1">89<span style="font-size:clamp(16px,2vw,22px);color:#6B7275;margin-left:10px;letter-spacing:0">USD</span></div>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#9AA1A4;max-width:44ch;text-wrap:pretty">Paid once. No account, no key, no metering &mdash; there is no server to meter you against.</p>
+          <a href="#get" style="display:inline-flex;align-items:center;justify-content:center;padding:16px 24px;background:#32CD32;border:1px solid #32CD32;color:#08090A;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:700;letter-spacing:0.18em;align-self:flex-start" class="h3">BUY THE PLUGIN</a>
+        </div>
+        <div style="background:#0B0D0E;padding:clamp(24px,3.4vw,38px);display:flex;flex-direction:column;gap:1px;justify-content:center">
+          <a href="https://merrymaker14.itch.io/the-interview" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 4px;border-bottom:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:0.12em;color:#E6E9EA" class="h6"><span>PLAY THE DEMO &mdash; FREE, WINDOWS</span><span style="color:#6B7275">&rarr;</span></a>
+          <a href="./docs/Documentation.html" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 4px;border-bottom:1px solid #191D1F;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:0.12em;color:#E6E9EA" class="h6"><span>READ THE DOCS</span><span style="color:#6B7275">&rarr;</span></a>
+          <a href="./assets/plugin-docs.pdf" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 4px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:0.12em;color:#E6E9EA" class="h6"><span>DOWNLOAD THE MANUAL (PDF)</span><span style="color:#6B7275">&darr;</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="position:relative;z-index:2;margin-top:clamp(56px,9vw,110px);border-top:1px solid #191D1F">
+    <div style="max-width:1240px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:clamp(24px,4vw,48px)">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#6B7275">AUTHOR</div>
+        <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:#E6E9EA;line-height:1.6">Tim &ldquo;merrymaker14&rdquo; Musharapov</div>
+        <a href="mailto:tmusharapov@bk.ru" style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:#32CD32">tmusharapov@bk.ru</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#6B7275">SUPPORT</div>
+        <p style="margin:0;font-size:13px;line-height:1.7;color:#9AA1A4;max-width:38ch;text-wrap:pretty">Public issue tracker first, email second. One person, and the time zone moves &mdash; a reply may not be the same day, but it comes.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#6B7275">THIRD-PARTY ATTRIBUTIONS</div>
+        <div style="display:flex;flex-direction:column">
+          <a href="./docs/ThirdPartyNotices.html" style="display:flex;align-items:center;justify-content:space-between;gap:14px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:0.06em;color:#E6E9EA;border-bottom:1px solid #191D1F;padding:11px 0" class="h6"><span>Third-party notices</span><span style="color:#6B7275">&rarr;</span></a>
+          <a href="./docs/VoiceLicences.html" style="display:flex;align-items:center;justify-content:space-between;gap:14px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:0.06em;color:#E6E9EA;border-bottom:1px solid #191D1F;padding:11px 0" class="h6"><span>Voice licences</span><span style="color:#6B7275">&rarr;</span></a>
+          <a href="./docs/Changelog.html" style="display:flex;align-items:center;justify-content:space-between;gap:14px;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:0.06em;color:#E6E9EA;border-bottom:1px solid #191D1F;padding:11px 0" class="h6"><span>Changelog</span><span style="color:#6B7275">&rarr;</span></a>
+        </div>
+        <p style="margin:4px 0 0;font-size:12px;line-height:1.7;color:#6B7275;max-width:38ch;text-wrap:pretty">Generated from the licence files in the package, never retyped by hand.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:#6B7275">THIS PAGE</div>
+        <p style="margin:0;font-size:13px;line-height:1.7;color:#9AA1A4;max-width:38ch;text-wrap:pretty">Static HTML. No analytics, no tracking, no third-party embeds. It would be strange to promise privacy and then sell you to a script.</p>
+      </div>
+    </div>
+    <div style="border-top:1px solid #191D1F">
+      <div style="max-width:1240px;margin:0 auto;padding:16px clamp(16px,4vw,44px);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.16em;color:#6B7275">
+        <span>OFFLINE&#8202;AI&#8202;NPC &mdash; CONVERSATIONAL NPCS THAT RUN LOCALLY</span>
+        <span>DESKTOP &middot; FOR YOUR ENGINE</span>
+      </div>
+    </div>
+  </footer>
+
+  
+    <div style="position:fixed;left:0;right:0;bottom:0;z-index:20;height:38px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 clamp(12px,3vw,24px);background:#0B0D0E;border-top:1px solid #23282B;font-family:ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.16em">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden">
+        <span style="width:7px;height:7px;background:#32CD32;display:inline-block;flex:none;animation:breathe 2.4s ease-in-out infinite"></span>
+        <span style="color:#32CD32;flex:none">LOCAL</span>
+        <span style="color:#5F6669;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">THIS PAGE MAKES NO CALLS HOME EITHER</span>
+      </div>
+      <a href="#get" style="color:#E6E9EA;flex:none;border-bottom:1px solid #23282B;padding-bottom:2px" class="h7">89 USD &mdash; BUY</a>
+    </div>
+  
+</div>
+</body>
+</html>
