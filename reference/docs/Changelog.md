@@ -221,10 +221,10 @@ what they are getting.
   Memory, Hardware), `Editor/`, `Tests/Editor`, `Tests/Runtime`, `Documentation/`,
   `LICENSES/`.
 - Four assembly definitions. `OfflineAINPC.Runtime` has an **empty `references` list** —
-  no game assembly, no LLMUnity, no whisper.unity — with `Newtonsoft.Json.dll` pulled in
-  as an explicit `precompiledReference` (it is a plugin DLL, not an asmdef assembly, so
-  naming it under `references` would silently fail to resolve). That empty list is what
-  makes the decoupling a compiler-enforced fact rather than a claim.
+  no game assembly, no LLMUnity, no whisper.unity. It briefly also carried
+  `Newtonsoft.Json.dll` as a `precompiledReference`; that dependency was removed before
+  release, and `precompiledReferences` is empty too. Beyond the engine the runtime takes
+  nothing, which is what makes the decoupling a compiler-enforced fact rather than a claim.
 - `ILanguageSource` + `FixedLanguageSource`: the seam that replaced `TTSEngineManager`'s
   direct read of the game's `LanguageManager`.
 - `MicChunk`: the recorder's own PCM carrier, replacing whisper.unity's `AudioChunk` on
