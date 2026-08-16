@@ -35,7 +35,7 @@ shuts them down; it does not ship their binaries.
 > **The espeak-ng row below is the one that decides whether this package can ship at all.**
 > What "external process" has to mean in practice, what a buyer owes if they redistribute
 > Piper, and what this demo project itself owes, are all in
-> [`docs/ESPEAK_BOUNDARY.md`](../../../docs/ESPEAK_BOUNDARY.md). `PackagingBoundaryTests`
+> [`ESPEAK_BOUNDARY.md`](ESPEAK_BOUNDARY.md). `PackagingBoundaryTests`
 > fails the build if any of it lands under `Assets/OfflineAINPC/`.
 
 | Component | Author | Licence | Source | How it is used | Verified |

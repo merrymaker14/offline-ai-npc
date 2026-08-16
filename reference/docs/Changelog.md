@@ -1,9 +1,12 @@
 # Changelog — Offline AI NPC
 
-All notable changes to the plugin. The format follows Keep a Changelog; versions will
-start at 1.0.0 when the package is first published.
+All notable changes to the plugin. The format follows Keep a Changelog.
 
-## [Unreleased]
+## [1.0.0] — 2026-08-17
+
+First public release. Everything below was built before it, and is listed rather than
+summarised because a first changelog is the only one a buyer can read as a description of
+what they are getting.
 
 ### Added — the guide for someone who has done none of this
 - **`BeginnerGuide.md`**, English and Russian in one file. The existing pages assume a

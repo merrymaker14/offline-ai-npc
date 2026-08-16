@@ -1,3 +1,19 @@
+// Running outside the design tool.
+//
+// This script was written for an environment that supplies `readFile` and `saveFile` as
+// globals. Node does not, so the same file cannot regenerate the pages after a documentation
+// change — and the documentation changes often. These definitions defer to the tool's own
+// functions when they exist, so the file still runs in both places.
+import { readFile as _readFile, writeFile as _writeFile, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
+
+const log = globalThis.log ?? console.log;
+const readFile = globalThis.readFile ?? (async path => _readFile(path, 'utf8'));
+const saveFile = globalThis.saveFile ?? (async (path, text) => {
+  await mkdir(dirname(path), { recursive: true });
+  await _writeFile(path, text, 'utf8');
+});
+
 
 const MONO = "ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace";
 const SANS = "Roboto,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
@@ -11,13 +27,24 @@ const PAGES = [
   { f:'Dialogue',          group:'Building with it',    nav:'Dialogue' },
   { f:'Actions',           group:'Building with it',    nav:'Actions' },
   { f:'Languages',         group:'Building with it',    nav:'Languages' },
+  { f:'State',             group:'Building with it',    nav:'State' },
+  { f:'Perception',        group:'Building with it',    nav:'Perception' },
   { f:'InterviewDemo',     group:'Building with it',    nav:'The interview demo' },
   { f:'Troubleshooting',   group:'When it breaks',      nav:'Troubleshooting' },
+  { f:'Limitations',       group:'When it breaks',      nav:'Limitations' },
+  { f:'Licensing',         group:'Licences and history',nav:'Licensing' },
   { f:'ThirdPartyNotices', group:'Licences and history',nav:'Third-party notices' },
   { f:'VoiceLicences',     group:'Licences and history',nav:'Voice licences' },
+  { f:'ESPEAK_BOUNDARY',   group:'Licences and history',nav:'The espeak boundary' },
   { f:'Changelog',         group:'Licences and history',nav:'Changelog' },
 ];
 const KNOWN = new Set(PAGES.map(p => p.f));
+
+// Files whose name in the package differs from their name here. The licence documents are
+// SHOUTING_CASE inside the package and CamelCase on the site, so a link written correctly in
+// the source resolves to nothing without this — and it degrades quietly, to grey text, which
+// is the kind of breakage nobody reports.
+const ALIASES = { VOICE_LICENCES: 'VoiceLicences', THIRD_PARTY_NOTICES: 'ThirdPartyNotices', CHANGELOG: 'Changelog' };
 const MISSING = new Map();
 
 const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -36,7 +63,7 @@ function inline(src) {
     if (/^https?:/.test(url)) return A(url, label, true);
     const mm = url.match(/([A-Za-z_]+)\.md(#[^)]*)?$/);
     if (mm) {
-      const file = mm[1], anchor = mm[2] || '';
+      const file = ALIASES[mm[1]] || mm[1], anchor = mm[2] || '';
       if (KNOWN.has(file)) return A('./' + file + '.dc.html' + anchor, label, false);
       MISSING.set(file, (MISSING.get(file) || 0) + 1);
       return '<span title="Ships inside the package; not on the site yet" style="color:' + C.dim + ';border-bottom:1px dotted ' + C.b2 + '">' + label + '</span>';
