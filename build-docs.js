@@ -29,6 +29,7 @@ const PAGES = [
   { f:'Languages',         group:'Building with it',    nav:'Languages' },
   { f:'State',             group:'Building with it',    nav:'State' },
   { f:'Perception',        group:'Building with it',    nav:'Perception' },
+  { f:'Recipes',           group:'Building with it',    nav:'Recipes' },
   { f:'InterviewDemo',     group:'Building with it',    nav:'The interview demo' },
   { f:'Troubleshooting',   group:'When it breaks',      nav:'Troubleshooting' },
   { f:'Limitations',       group:'When it breaks',      nav:'Limitations' },

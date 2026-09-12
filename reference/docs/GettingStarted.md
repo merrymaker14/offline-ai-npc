@@ -65,19 +65,28 @@ three fields blank. The Welcome window counts those separately for the same reas
 windows that disagreed.
 
 
-Pick the preset for your language and tier and download it. The manager verifies the file
-against a hash, so a truncated download is caught before it is loaded rather than as a
-mysterious failure later. Presets carry their licence, and the default line-up is chosen to
-need no attribution in your shipping game.
+Pick the preset for your language and tier and download it. The manager checks the size
+and reads the GGUF header of every download, and verifies the hash when the preset carries
+one, so a truncated file is caught before it is loaded rather than as a mysterious failure
+later. Presets carry their licence, and the default line-up is chosen to need no attribution
+in your shipping game.
 
-If you already have a `.gguf`, put it in `StreamingAssets` and name it as the manifest
-expects.
+If you already have a `.gguf`, drop it into the Model Manager's folder (the window shows the
+path) under the file name the manifest expects. At runtime the plugin looks in that folder
+first, then in `persistentDataPath`, then in `StreamingAssets` — so a file a player
+downloaded and a file you shipped are both found without configuration.
 
 ## 3. A voice
 
-Install [Piper](https://github.com/rhasspy/piper) and put its folder somewhere your build can
-reach. Add at least one voice — **both files**, `name.onnx` and `name.onnx.json`. A missing
-`.json` gives you silence with no error, and it is the most common setup problem there is.
+Install [Piper](https://github.com/rhasspy/piper): unpack a release into
+`Assets/StreamingAssets/piper/` so that `piper.exe` sits directly in it, and put voices in
+`Assets/StreamingAssets/piper/voices/`. Add at least one voice — **both files**, `name.onnx`
+and `name.onnx.json`. A missing `.json` gives you silence with no error, and it is the most
+common setup problem there is.
+
+On Windows the driver runs `piper.exe`; on macOS or Linux it looks for a binary named
+`piper` in the same folder. Only Windows has been exercised — on another platform test it
+first, or bring your own engine; see [Languages](Languages.md#bring-your-own-engine).
 
 For Japanese you supply the engine — the package ships Piper only. VOICEVOX is the usual
 choice and connecting it is about eighty lines against one interface; the complete worked
@@ -103,8 +112,8 @@ every red item is something that would otherwise surface later as odd behaviour.
 Add to a GameObject in your scene:
 
 - an `AudioSource` for her voice,
-- your dialogue controller — copy the one in
-  [Dialogue](Dialogue.md#the-whole-controller) (there is no runnable sample yet),
+- your dialogue controller — copy `Samples/HelloNpc/HelloNpcCharacter.cs`, or the one
+  printed in [Dialogue](Dialogue.md#the-whole-controller),
 - optionally `NpcStateComponent` and `PerceptionQuery` once she works.
 
 Give her a persona: who she is, how she speaks, a handful of facts. Keep it short. Everything
@@ -119,11 +128,15 @@ controller.
 Two things that are not obvious and will cost you an evening each:
 
 **Silence is transcribed as words.** Whisper hallucinates on an empty recording — "Thank you
-for watching" and similar. Gate on RMS and drop anything below a threshold, and filter the
-known phrases. Without this, a stray key press starts a conversation.
+for watching" and similar. Without a gate, a stray key press starts a conversation. The
+plugin ships one: `UtteranceGate` checks the recording's energy before you pay for
+recognition and the transcript against the known phrases after it (hand it the recording's
+RMS and an audible "okay" gets through); `TranscriptCleaner` strips the bracketed sound-words
+recognition adds. Both are pure C# — see [Troubleshooting](Troubleshooting.md).
 
-**Any word can be a trigger.** If you route on keywords, use word boundaries. A hallucinated
-fragment containing your trigger word inside another word will fire it.
+**Any word can be a trigger.** If you route on keywords, match whole words. In a script
+without spaces — Japanese, Chinese — a `\b` boundary does not exist, so compare against the
+exact token the recogniser returned rather than a substring.
 
 ## 7. Run it
 

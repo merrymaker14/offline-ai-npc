@@ -41,7 +41,8 @@ original.
 
 ## The whole controller
 
-Minus your project's specifics. It compiles against the public API and nothing else.
+Minus your project's specifics. It uses the public API and nothing else; `HelloNpcCharacter`
+in the samples is the same shape, compiled and run.
 
 ```csharp
 using System;
@@ -126,9 +127,18 @@ symptom is that the character simply stops responding, with nothing in the conso
 **`InputComplete()`.** Without it the synthesis loop waits forever for a unit that is
 never coming, and the character never finishes speaking.
 
-**A null engine is normal.** The engine reference is a `Func<>` and not a stored reference
-because the engine is replaced when the language changes. During that switch it is null; the
-session handles it by delivering the line to the subtitle only. Do not assume it is there.
+**A failed generation must still end the session.** Never read a faulted task's `Result`
+inside the coroutine: it rethrows, the exception kills the coroutine, and Unity does not run
+its `finally` — so the lock stays held and the two speech loops wait forever. Poll the task,
+check `IsFaulted`, and on failure call `_speech.Cancel()` and release the lock yourself
+before returning; `HelloNpcCharacter` shows the shape. If you stop the coroutines with
+`StopCoroutine` instead of letting them drain, call `_speech.Dispose()` so the clip in the
+air is released.
+
+**A missing engine is normal.** The engine reference is a `Func<>` and not a stored reference
+because the engine is replaced when the language changes. During that switch it is null or
+reports not ready; the session handles both by delivering the line to the subtitle only. Do
+not assume it is there.
 
 ---
 
@@ -164,6 +174,13 @@ NPCMemory.Append(npcId, NPCMemory.RoleNpc,  reply);
 
 string replay = NPCMemory.GetContextString(npcId, lastN: 10);
 ```
+
+The replay is labelled `Player:`, `You:` and `Earlier:` — in English. Pass the language
+code and the labels follow it: `GetContextString(npcId, 10, "ru")` writes `Игрок:` and
+`Ты:`. A project whose player is a detective, not a "Player", sets `NPCMemory.Labels`
+once at startup, or `MemoryLabels.Register("en", ...)` per language; the labels go into
+the prompt, so they should be in the character's language and name the roles the way your
+game does.
 
 Fold `replay` into the system prompt when you build it. The window is deliberately small:
 every remembered turn is prompt tokens on every subsequent turn, and a 4B model's attention
@@ -240,6 +257,8 @@ touches disk is not a performance decision.
 |---|---|
 | `Append(npcId, role, text)` | adds one line; roles are `RoleUser`, `RoleNpc`, `RoleOther`, `RoleSummary` |
 | `GetContextString(npcId, lastN)` | the last `lastN` **exchanges**, formatted for a prompt |
+| `GetContextString(npcId, lastN, languageCode)` | the same, labelled in that language |
+| `Labels` | the labels used when no language is given — `Player:`, `You:`, `Earlier:` by default |
 | `Clear(npcId)` | forgets that character, store included |
 | `MaxEntries` | 40 lines per character — older lines fall off the end |
 | `Compactor` | optional: your own summariser, called when the window overflows |
@@ -257,7 +276,15 @@ by speaker id — that is how two English speakers in one scene sound different.
 each voice is a separate process, spawned lazily; with VOICEVOX, a speaker id on one server.
 
 Spawn the voices you will need up front rather than on the first line. A Piper process takes
-about 1.3 s to come up, and paying that mid-scene is an audible silence.
+about 1.3 s to come up, and paying that mid-scene is an audible silence:
+`PiperEngine.PrewarmVoices()` once the engine reports ready brings up the secondary voice too.
+
+A character can also name its voice outright. The session's second constructor takes a
+`SpeechRequest` as the voice template — `new SpeechRequest("", speakerId, languageCode,
+voiceId, style)` — and stamps each unit's text onto it, so the language, the voice and a
+delivery hint travel with every unit to an engine that understands them. With Piper the
+voice id is a voice file name; the speaker id keeps working as before. See
+[Languages](Languages.md#a-streaming-engine).
 
 ---
 
@@ -266,4 +293,4 @@ about 1.3 s to come up, and paying that mid-scene is an audible silence.
 - **Speech recognition** — see [GettingStarted](GettingStarted.md#6-speech-recognition).
 - **Actions** (the character doing rather than saying) — see [Actions](Actions.md).
 - **Perception** (the character knowing what is around her) — see [Perception](Perception.md).
-- **Lip sync.** Not included; the demo project drives a jaw bone itself.
+- **Lip sync.** Not included; The Interview demo animates mouth frames from the playing audio.

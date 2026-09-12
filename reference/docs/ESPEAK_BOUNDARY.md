@@ -36,8 +36,8 @@ Three facts, and all three have to stay true:
 2. **Not distributed by the package.** Nothing under `Assets/OfflineAINPC/` is, contains, or
    downloads a copy of Piper, espeak-ng, or their data. The user installs the engine
    themselves and tells the plugin where it is.
-3. **Independent function.** The plugin works with no Piper at all — VOICEVOX, a buyer's own
-   engine, or silence. Piper is one of several things it can be pointed at, not a component
+3. **Independent function.** The plugin works with no Piper at all — another engine, a
+   buyer's own, or silence. Piper is one of several things it can be pointed at, not a component
    it is built out of.
 
 Arms-length process separation with data passed over a pipe is the standard reading of the
@@ -45,7 +45,7 @@ GPL's boundary, and it is the same shape as an editor invoking `gcc`. What break
 distribution: shipping the binary alongside your proprietary package, or fetching it into
 the package's own folder, makes it part of what you distribute.
 
-**`PackagingBoundaryTests` enforces fact 2 in CI.** It fails the build if an engine binary,
+**A test in the source repository enforces fact 2.** It fails if an engine binary,
 an `espeak-ng-data/` directory, or a `.onnx` / `.gguf` payload ever appears under
 `Assets/OfflineAINPC/`. It also fails if the boundary stops being documented — this file is
 part of the contract, not commentary on it.
@@ -76,25 +76,25 @@ combined with it into one work — `piper.exe`, which is a separate program you 
 merely redistributing.
 
 The escape hatch, if any of that is unacceptable: **do not ship Piper.** Point the plugin at
-VOICEVOX, at a system TTS, or at your own engine, and let players who want Piper install it
+another engine, at a system TTS, or at your own, and let players who want Piper install it
 themselves. Nothing in the plugin requires it.
 
 ### Voice models are a separate question
 
 `*.onnx` voice files carry their own dataset licences, and they are *not* uniformly
 permissive — some forbid commercial use. GPL compliance for espeak-ng says nothing about
-them. Check each voice individually; `docs/voice_manifest.md` records what this project
-verified per voice.
+them. Check each voice individually; [`VOICE_LICENCES.md`](VOICE_LICENCES.md) records what
+was verified per voice, and how.
 
-## 5. Chinese, and why it is not here
+## 4. Chinese, and why it is not here
 
 Piper's Chinese voices phonemise through `pinyin`, not espeak. That was measured, not
 assumed: the same bytes through an espeak-typed voice and a pinyin-typed voice produce
-different `phoneme_type` handling (stage 5F). It does not change anything above — the
+different `phoneme_type` handling. It does not change anything above — the
 espeak-ng binary is still inside the Piper distribution regardless of which voice you load,
 so shipping Piper ships espeak-ng even for a Chinese-only game.
 
-## 6. When to re-read this
+## 5. When to re-read this
 
 - Before any change that puts a file under `Assets/OfflineAINPC/`
 - Before adding an "install Piper for me" button anywhere in the editor tooling — a

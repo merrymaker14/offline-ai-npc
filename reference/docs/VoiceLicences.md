@@ -30,8 +30,8 @@ attribution by their terms, but neither card supplies the string to use.
 is in breach. It was listed as "ready out of the box" in this package's own documentation
 until this was read — that listing was wrong and has been corrected.
 
-It is also the voice this demo project uses for one character. That is a problem for the
-game, separately from the plugin.
+It was also, for a while, a default in the Piper component. It is not any more; the
+component's defaults are the public-domain voices below.
 
 ### 2. Every one of these voices is finetuned from `lessac`, whose dataset forbids commercial use
 
@@ -54,10 +54,10 @@ not one a developer should answer for a shipping product. What is established:
 - a CC0 *dataset* (davefx, dmitri) does not clear the lessac provenance, because the CC0
   applies to the recordings that were finetuned ON, not to the voice that was finetuned FROM.
 
-**Consequence for stage 5E's conclusion:** it recorded `ru_RU-dmitri` as "a voice with a
-licence fit for commercial redistribution". That was based on the dataset line alone and did
-not account for the provenance line on the same card. The dataset is still CC0; the claim
-that the voice is commercially clear is no longer supportable without legal advice.
+**Consequence for an earlier reading:** `ru_RU-dmitri` had been recorded here as "a voice
+with a licence fit for commercial redistribution". That was based on the dataset line alone
+and did not account for the provenance line on the same card. The dataset is still CC0; the
+claim that the voice is commercially clear is no longer supportable without legal advice.
 
 ---
 
@@ -77,7 +77,7 @@ jurisdiction and risk appetite. The plugin points at the cards; it does not vouc
 
 ---
 
-## Resolved 2026-07-30 (stage 5L): two voices with a clean provenance
+## Resolved 2026-07-30: two voices with a clean provenance
 
 The problem above has an answer. Two Piper voices are **trained from scratch**, and their
 cards were read before anything was built on them:

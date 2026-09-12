@@ -21,7 +21,10 @@ mode both rows:
 | One character generating | 2.4 s |
 | Player's turn while background characters generate | **12.7 s** |
 
-Roughly 5×. The worst single turn in that contended run took 125 s.
+Roughly 5×. The worst single turn in that contended run took 125 s. These two rows were
+measured once, in the demo project, with several characters generating on a timer; the
+shipped latency runner measures one character and cannot reproduce them — the 2.0 s figure
+on the other pages is the one it reproduces.
 
 **The mitigation.** Suspend background conversation the moment the player starts speaking,
 rather than when their speech has been transcribed — the transcription itself takes seconds
@@ -126,7 +129,13 @@ switch costs, so switch on a menu screen rather than mid-conversation.**
 Windows, macOS and Linux. Not mobile, not web, not console. The model file is gigabytes and
 the speech engines are external processes; neither survives those platforms.
 
-No mitigation. It is not on a roadmap.
+Within desktop, one more line: the shipped Piper driver looks in `StreamingAssets/piper/`
+for `piper.exe` on Windows and for `piper` on macOS and Linux, and **only Windows has been
+exercised**. The language model and recognition are cross-platform; on another desktop
+platform put the matching Piper release there and test it before relying on it, or bring
+your own engine.
+
+No mitigation for the platform list. It is not on a roadmap.
 
 ---
 
@@ -236,8 +245,9 @@ mistaken for a bug.
 Named so you do not go looking:
 
 - **RAG / document retrieval.** Not present.
-- **Lip sync.** The demo project drives a jaw bone itself; the plugin does not ship a
-  solution.
+- **Lip sync.** The plugin does not ship a solution. The Interview demo animates mouth
+  frames from the audio it plays, and a rig with a jaw bone can be driven the same way from
+  the playing `AudioSource`.
 - **Emotion or voice-style control in TTS.** Piper voices have a fixed delivery.
 - **Streaming speech recognition.** Recognition runs on a finished utterance, not
   continuously.

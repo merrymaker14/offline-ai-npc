@@ -39,8 +39,8 @@ is deliberately not green — "not measured" and "all good" must not look identi
 A Piper voice is `name.onnx` **and** `name.onnx.json`. With the `.json` missing the engine
 starts, reports itself ready, and synthesises silence.
 
-**Fix:** download both files into the `voices/` folder. The setup check flags an unpaired
-voice.
+**Fix:** download both files into `Assets/StreamingAssets/piper/voices/`. The setup check
+flags an unpaired voice.
 
 ---
 
@@ -48,12 +48,14 @@ voice.
 
 > `[OfflineAINPC] No model weights found. Expected one of: …`
 
-The tier system resolved a tier, asked the catalogue for that tier's model, and the file is
+The tier system resolved a tier, asked the catalog for that tier's model, and the file is
 not on disk.
 
 **Fix:** open `Tools ▸ Offline AI NPC ▸ Model Manager` and download the preset for your
-language and tier, or place the `.gguf` in `StreamingAssets` under the exact file name the
-message lists. A renamed file is not found — the name in the manifest is the name on disk.
+language and tier, or place the `.gguf` under the exact file name the message lists in one
+of the places the plugin looks — the Model Manager's folder, `persistentDataPath`, or
+`StreamingAssets`, in that order. A renamed file is not found — the name in the manifest
+is the name on disk.
 
 ---
 
@@ -135,9 +137,11 @@ Perception is off. Measured in the same scene: with it off the character mention
 fireplace, a window seat and a cat, none of which existed; with it on she spoke only about
 real objects.
 
-**Fix:** see [Perception](Perception.md). Also check pivots — an object whose pivot sits at
-`y = 0` while its body is a metre up traces occlusion from the floor and reads as hidden.
-That made half of one scene's furniture invisible to perception.
+**Fix:** see [Perception](Perception.md). Line of sight is measured to the centre of the
+object's renderers, not to its pivot, so a floor-level pivot under a metre-high body no
+longer hides it. A marker with no renderer is aimed at its pivot — give it an Aim Point at
+the height a person would look at. `PerceptionQuery.Explain(poi)` says exactly why an
+object is or is not in context.
 
 ---
 
@@ -157,7 +161,7 @@ Two different causes:
 
 - **Wrong voice, right language:** the language has no voice bound for its code in the
   engine binding table. The manager logs which codes it has: `No engine bound for 'ko'.
-  Bound languages: ja, en, es, ru`.
+  Bound languages: ja, en, es, ru, zh-Hans`.
 - **Right voice, wrong language of reply:** the voice was switched but the prompt was not.
   Switch through your language manager so the system prompt is rebuilt, not through the TTS
   manager alone. This one hides well — the voice is correct both times, so the switch looks
@@ -167,7 +171,8 @@ Two different causes:
 
 ## The transcript comes back in a script nobody spoke, or as bracketed sound words
 
-> the player said "do you hear me" and the box filled with `(シャッ)(シャッ)(シャッ)(シャッ)`
+> the player said "do you hear me" and the box filled with the same katakana sound-word
+> four times over
 
 Two separate faults, and they arrive together often enough to look like one.
 
@@ -187,33 +192,35 @@ Two separate faults, and they arrive together often enough to look like one.
 **Fix for the second:** strip annotations before you call `Inspect(text, language)`, and
 treat a line that is *only* annotation as nothing said. Removing the brackets rather than
 rejecting the line matters — `(coughs) where were you on the fourteenth` is a real question
-with a cough in front of it. The demo does this in `Transcript.Clean`, which is thirty lines
-of pure C# you can copy.
+with a cough in front of it. `TranscriptCleaner.Clean(raw, out cleaned)` in the plugin does
+exactly this: it strips `(...)`, `[...]`, `*...*` and note-marked runs, and returns
+`OnlyNoise` when nothing is left.
 
 ---
 
 ## Verification says a language is not configured
 
-> `'ko' is not one of the languages this project configures (it configures en, ja, es, ru)`
+> the live-verification window refuses a language code and lists the ones the catalog has
 
 Correct and deliberate. Ask `LanguageRuntime.IsConfigured(code)`, which answers about the
-catalogue. Do not use `Find`/`FindOrDefault` for that question — they fall back to the default
+catalog. Do not use `Find`/`FindOrDefault` for that question — they fall back to the default
 language, so an unconfigured code comes back looking supported.
 
 ---
 
 ## Live verification cannot check dialogue
 
-Voices audition from the editor. Dialogue does not: the language model is constructed in
-`Start()` and its continuations only run inside the player loop.
+Voices audition from the editor. Dialogue does not: the language model's agent finishes
+starting inside the player loop, which does not run in edit mode. The window says so after a
+few seconds rather than waiting for a load that cannot complete.
 
-**Not a bug.** Enter Play mode for dialogue checks.
+**Not a bug.** Enter Play mode for dialogue checks; the same window works there.
 
 ---
 
 ## Still stuck
 
-`Tools ▸ Offline AI NPC ▸ Diagnostics` produces a report you can paste into a support
-request: hardware, tier, model, dependency versions, what is installed and what is missing.
-It contains no personal data and is not sent anywhere — the plugin has no telemetry of any
-kind.
+`Tools ▸ Offline AI NPC ▸ Check my setup` ▸ **Copy as text** puts a report on the clipboard
+you can paste into a support request: hardware, tier, model, dependency versions, what is
+installed and what is missing. It contains no personal data and is not sent anywhere — the
+plugin has no telemetry of any kind.

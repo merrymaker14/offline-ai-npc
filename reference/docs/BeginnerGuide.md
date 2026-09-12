@@ -4,8 +4,6 @@ The long way round, assuming you have never installed a Unity package with exter
 dependencies. It starts with an empty project and ends with a build you can hand to
 somebody else. Allow an hour; most of it is downloads.
 
-A Russian translation is kept in the project repository under `docs/ru/BeginnerGuide.md`.
-
 ---
 
 ## 0. What this is, in one paragraph
@@ -29,7 +27,7 @@ Unity.
 | **Render pipeline** | any — Built-in, URP, HDRP. The runtime references no rendering package |
 | **Platform** | Windows, macOS or Linux **desktop**. Not mobile, not web, not console, and that is a hard limit — the model is gigabytes and the speech engines are separate processes |
 | **Disk** | 10 GB free is comfortable |
-| **Graphics** | runs with no GPU at all, just slower. 6 GB of VRAM fits a 4B model entirely on the card |
+| **Graphics** | 6 GB of VRAM fits a 4B model entirely on the card. Without a usable GPU it runs on the CPU only with 16 GB of RAM and four cores, slowly; below that the lowest tier has no language model at all — see [Hardware tiers](HardwareTiers.md) |
 | **Internet** | for the downloads on this page only. Never at runtime |
 
 If any of those are a problem, read [Is this for your game?](IsThisForYourGame.md) before
@@ -117,9 +115,10 @@ Things worth knowing:
 
 Speech **output**. The plugin ships the integration; the engine is yours to install.
 
-1. Download [Piper](https://github.com/rhasspy/piper) and put its folder somewhere your
-   project can reach.
-2. Add at least one voice — **both files**: `name.onnx` **and** `name.onnx.json`.
+1. Download a [Piper](https://github.com/rhasspy/piper) release and unpack it into
+   `Assets/StreamingAssets/piper/`, so that `piper.exe` is directly inside that folder.
+2. Add at least one voice to `Assets/StreamingAssets/piper/voices/` — **both files**:
+   `name.onnx` **and** `name.onnx.json`.
 
 > ### The most common setup failure in this whole package
 > A voice with the `.onnx` but not the matching `.onnx.json`.
@@ -258,11 +257,11 @@ All under `Tools ▸ Offline AI NPC`.
 | Window | What it answers |
 |---|---|
 | **Welcome** | "What do I do first?" Three cards, once, on first import |
-| **Model Manager** | "Which model, and is it really here?" Tier, languages and licence per row, hash-verified downloads, and control over what enters a build |
+| **Model Manager** | "Which model, and is it really here?" Tier, languages and licence per row, downloads checked by size and header (and by hash when the preset carries one), and control over what enters a build |
 | **Presets** | "Which model and which voice does this language and tier use?" |
 | **Check my setup** | "Is anything wrong before I press Play?" Real checks, each failure saying what to do |
 | **Prompt debugger** | "**Why did she say that?**" What the model was actually told. For a local product this is the only way to answer it |
-| **Live verification** | "Does it actually speak?" Proves a character talks **without entering play mode** — static checks can say a configuration is valid, never that it works |
+| **Live verification** | "Does it actually speak?" Auditions the real voice without entering play mode, and runs a whole turn — prompt, model, voice — in play mode. Static checks can say a configuration is valid, never that it works |
 
 ### What the plugin deliberately does not do
 
@@ -437,18 +436,26 @@ listed; the rest are internals that happen to be public.
 |---|---|
 | `AxisCatalogAsset` | which axes your characters have at all |
 | `TraitPresetAsset` | fixed dispositions: the shy one, the blunt one |
-| `PerceptionWeights` | how much each factor of attention counts, per scene |
-| `SamplingProfile` | temperature, penalties, reply length |
-| `PresetCatalog` | which model and voice a language and tier resolve to |
+| `LanguageDefinition`, `LanguageSet` | one language, and the set your project ships |
+| `ModelManifest` | which model each tier wants |
+| `TierPolicy` | the tier thresholds and the VR reserve |
+
+### Configure in the inspector or in code
+
+| Type | Why |
+|---|---|
+| `PerceptionWeights` | how much each factor of attention counts — a field on the perception query |
+| `SamplingProfile` | temperature, penalties, reply length, per tier |
+| `PresetCatalog` | which model and voice a language and tier resolve to — the JSON the Model Manager reads |
 | `KeyValueStateStore` | a ready `IStateStore` over any key-value storage you already have |
 | `ActionTargetBehaviour` | the component that makes a GameObject nameable as a target |
 | `ActionVerb` | one declared verb: its name, its parameters, whether it needs a target |
 | `ActionParams`, `NpcActionEvent` | the arguments an action carries, and the UnityEvent you wire in the inspector |
 
-> **Coverage, honestly.** The package has 138 public types and the documentation names
-> about a third of them. The rest are data holders, enums and internals that happen to be
-> public — but if you meet a name here that no page explains, that is a gap in these docs
-> rather than something you are expected to already know.
+> **Coverage, honestly.** The documentation names the types you put on objects, implement,
+> call and author; the rest are data holders, enums and internals that happen to be public.
+> If you meet a name that no page explains, that is a gap in these docs rather than
+> something you are expected to already know.
 
 ## 13. Making a build
 
@@ -491,7 +498,7 @@ In the order these actually happen:
 | Works in editor, silent in build | Piper not beside the player, or the path is wrong |
 | She says "MMaraMara VMara Vey…" | cumulative fed to `Append`, or deltas to `AppendCumulative` |
 | Stopped answering, nothing in console | a leaked `_busy` — check every exit path |
-| Everything is very slow | which tier resolved? Below the lowest it runs on the CPU |
+| Everything is very slow | which tier resolved? The Light tier on a CPU is slow by design; below it there is no model |
 
 [Troubleshooting](Troubleshooting.md) maps real error strings to fixes.
 

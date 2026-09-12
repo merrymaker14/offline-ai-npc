@@ -24,7 +24,7 @@ first word:
 |---|---|
 | One character, shipping path, nothing else generating | **2.0 s** |
 | One character, nothing else generating, waiting for the *whole* reply | 2.4 s |
-| Waiting for the whole reply **while other characters generate in the background** | **12.7 s** |
+| Waiting for the whole reply **while other characters generate in the background** | **12.7 s** (measured once, in the demo project) |
 
 The two lower rows are the honest comparison — same measurement mode, so the difference is
 contention and nothing else: **background conversation costs roughly 5×**. The 2.0 s figure
@@ -93,8 +93,8 @@ your design cannot tolerate an off-key line, this is the wrong tool.
 
 ## Fits with care
 
-**Many characters where only one is active at a time.** A dormitory of six where you talk to
-one is fine. Six talking at once is not. The distinction is whether they generate
+**Many characters where only one is active at a time.** A house of six characters where you
+talk to one is fine. Six talking at once is not. The distinction is whether they generate
 simultaneously, not how many exist.
 
 **Games leaning on the deterministic half.** State axes, thresholds and events are exact
@@ -116,18 +116,21 @@ Two external dependencies, neither bundled, both free:
 - **whisper.unity**, for speech recognition. Optional if you only want typed input.
 
 And a model file — 1 to 5 GB depending on tier, which you or your player downloads. The
-package ships a catalogue of licence-checked options and a download manager, but not the
+package ships a catalog of licence-checked options and a download manager, but not the
 weights themselves.
 
-Speech synthesis is an external process you install (Piper, or VOICEVOX for Japanese). If
-you redistribute Piper with your game, note that it links espeak-ng under GPL-3.0 — see
-[Licensing](Licensing.md), which explains exactly what that obliges and how to avoid it.
+Speech synthesis is an external process you install (Piper, or an engine of your own for
+Japanese). The shipped Piper driver has been exercised on Windows only; on macOS or Linux
+it looks for a `piper` binary in the same folder, untested. If you redistribute Piper with your game, note
+that it links espeak-ng under GPL-3.0 — see [Licensing](Licensing.md), which explains
+exactly what that obliges and how to avoid it.
 
 ---
 
 ## Still unsure?
 
-Install a sample, press Play, and read your own numbers: `Tools ▸ Offline AI NPC ▸ Live
-verification` times a real turn on *your* machine — first audio, tier, layers on the GPU.
+Open a sample scene, press Play, and read your own numbers: `Tools ▸ Offline AI NPC ▸ Live
+verification` times a real turn on *your* machine in Play mode — first audio, tier, layers
+on the GPU. Voices alone it can audition without Play mode.
 "Will this run acceptably here" is the one question no cloud-based competitor can answer
 for you, and the only honest way to answer it is on your hardware.

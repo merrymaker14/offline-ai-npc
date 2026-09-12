@@ -39,6 +39,7 @@ TITLES = {
     "Dialogue": "Dialogue — Offline AI NPC",
     "Actions": "Actions — Offline AI NPC",
     "Languages": "Languages — Offline AI NPC",
+    "Recipes": "Recipes — Offline AI NPC",
     "InterviewDemo": "The interview demo — Offline AI NPC",
     "Troubleshooting": "Troubleshooting — Offline AI NPC",
     "ThirdPartyNotices": "Third-party notices — Offline AI NPC",

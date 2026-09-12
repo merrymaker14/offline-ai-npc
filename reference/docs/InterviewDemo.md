@@ -10,7 +10,7 @@ she hears you through your microphone, and she speaks with a voice synthesised l
 > Windows build, about 788 MB, which fetches its language model on the first launch.
 >
 > **Where it lives.** The scene is `Assets/Demo/Scenes/InterviewDemo.unity` in the project
-> repository. It is not packaged into `Samples~` yet — the three samples that ship are
+> repository. It is not one of the packaged samples — the three that ship in `Samples/` are
 > HelloNpc, LivingCharacter and WorldAware. This page describes it because it is the fullest
 > answer to "what does a finished thing built on this look like".
 
@@ -94,7 +94,7 @@ to first audio: 2532 ms
 - **tier** — what the hardware probe decided your machine can carry ([Hardware tiers](HardwareTiers.md))
 - **model** — which model that tier chose from the catalog
 - **tok/s** — generation speed on your GPU, measured, not claimed
-- **to first audio** — from your question to her first spoken syllable
+- **to first audio** — from your question to the moment her first sentence starts playing
 
 That last number is the one that matters, and it is measured the honest way: not "the model
 finished" but "sound came out of the speakers". The first turn of a session is slower than the
@@ -134,8 +134,9 @@ which is how several of the documentation pages you are reading got corrected.
    panel is still filling in.
 3. Ask her something.
 
-It needs the same three things the rest of the plugin needs: a model in `StreamingAssets`,
-Piper with a paired voice, and — for speech input only — a Whisper model. `Tools ▸ Offline AI
+It needs the same three things the rest of the plugin needs: a model the Model Manager
+knows about, Piper with a paired voice in `StreamingAssets/piper/`, and — for speech input
+only — a Whisper model. `Tools ▸ Offline AI
 NPC ▸ Check my setup` names whichever is missing.
 
 **English only, and the settings screen says so rather than pretending.** The demo ships one

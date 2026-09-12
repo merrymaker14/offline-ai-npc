@@ -112,7 +112,7 @@ apply to shipping `espeak-ng.dll`, never to the wav files it helped make.
 
 ## Model weights
 
-The default catalogue is **Apache-2.0** (the Qwen3 family), chosen because it is the cleanest
+The default catalog is **Apache-2.0** (the Qwen3 family), chosen because it is the cleanest
 licence to redistribute under and needs no visible attribution.
 
 Some other families do require attribution — Llama's "Built with Llama" is the usual one. The

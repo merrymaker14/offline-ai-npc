@@ -51,7 +51,14 @@ Quality across that tail varies a great deal. Korean, German, French, Portuguese
 Chinese, Polish, Dutch and Turkish are all well covered by both model and recognition; a
 language with little presence in the training data will be understood but spoken awkwardly.
 Test yours before committing to it: `Tools > Offline AI NPC > Live verification` will
-speak a line and run a turn in the language you are considering.
+speak a line in the language you are considering, and in Play mode run a whole turn in it.
+
+The plugin's built-in catalog already *configures* Japanese, Spanish, Russian and Simplified
+Chinese — prompt wording, length rule, recognition code — with the voice slot **empty**. A
+character in those languages thinks and writes out of the box; the speech engine reports
+"no voice is configured" until you point the definition at a voice you have cleared. That is
+deliberate: shipping a voice whose licence excludes commercial products would put your game
+in breach by default.
 
 ### Adding a language, start to finish
 
@@ -78,7 +85,7 @@ speak a line and run a turn in the language you are considering.
    | Persona header | `한국어로만 대답하세요.` | How the persona block is introduced — *in that language* |
    | State header | `지금:` | How world state (time, weather) is introduced. Also in that language |
    | **Reply length** | | |
-   | Length instruction | `한 문장으로 짧게 대답하세요.` | The rule the model reads. Leave empty and one is generated (English or Japanese only) |
+   | Length instruction | `한 문장으로 짧게 대답하세요.` | The rule the model reads. Leave empty and one is generated — in Japanese, Chinese or English; any other language gets the English phrase, so write your own |
    | Length unit | `Characters` | **Words are meaningless without word spacing** |
    | Length target | `30` | Characters for CJK, ~12 words otherwise |
    | **Max tokens** | `48` | The hard stop. This is what actually bounds the reply — the instruction is a request, this is a limit |
@@ -110,6 +117,11 @@ speak a line and run a turn in the language you are considering.
 That is the whole process. There is no list of approved languages in the code, and **the
 plugin does not gate on this page** — if you have a good Korean voice and a model that
 handles Korean, add it and it works.
+
+The definition also carries the prompt's connecting words for that language — the header
+of the state block, the header of the nearby-objects list, the sentence that says an action
+target is one of those ids. Leave them empty for the five shipped codes; fill them for a new
+language, or the model reads English fragments inside a Korean prompt.
 
 ### Two things that will bite you
 
@@ -144,6 +156,11 @@ release.
 LanguageRuntime.SetCurrent("ko");
 ```
 
+The speech engines follow the runtime by default, so this one call is the whole switch. A
+project that keeps the current language somewhere of its own wraps it in an `ILanguageSource`
+and assigns `TTSEngineManager.LanguageSource` instead; `LanguageRuntime.TrySetCurrent`
+refuses a code the catalog does not configure, where `SetCurrent` accepts it and warns once.
+
 This restarts the speech engine with the new voice and invalidates the prompt cache, so the
 next reply pays the cold cost (~2.1 s on the reference machine). Rapid changes are coalesced,
 so dragging a settings dropdown does not queue five restarts. **Switch on a menu screen, not
@@ -156,7 +173,7 @@ if (!LanguageRuntime.IsConfigured("ko"))
     // ... offer the download, or fall back
 ```
 
-`IsConfigured` answers about the actual catalogue. Do not use `Find`/`FindOrDefault` for this
+`IsConfigured` answers about the actual catalog. Do not use `Find`/`FindOrDefault` for this
 question: they fall back to the default language, so an unconfigured code comes back looking
 supported. That exact conflation once made a verification matrix report Russian as verified
 after hearing an English voice say an English sentence.
@@ -188,15 +205,74 @@ public interface ITTSEngine
 }
 
 // Optional, when one engine serves several languages:
-public interface ILanguageAwareEngine { void SetLanguage(string languageCode); }
+public interface ILanguageAwareEngine
+{
+    void SetLanguage(string languageCode);
+    bool RestartOnLanguageChange => true;   // false: told the language, keeps running
+}
+
+// Optional, when the engine can hand audio back in pieces:
+public interface IStreamingTTSEngine : ITTSEngine
+{
+    IEnumerator Synthesize(SpeechRequest request, Action<AudioChunk> onChunk, CancellationToken cancellation);
+}
 ```
 
-Four members. `Synthesize` is a coroutine rather than a `Task` on purpose — engines poll, and
-the queue that owns the voice runs on scaled time, so a wall-clock `Task` would keep speaking
-through a pause.
+Four members for the simplest engine. `Synthesize` is a coroutine rather than a `Task` on
+purpose: the session drives it frame by frame, can abandon it on a deadline, and it pauses
+with the game loop, where a wall-clock `Task` would run on and hand audio back from another
+thread. The rules every implementation is held to — `onAudio` at most once and never on
+failure, `StartAsync` never throws, `StopAsync` safe twice — are in the interface's own
+documentation, and the plugin's session, latency runner and verification window all rely on
+them.
 
 `AudioData` is raw samples plus a rate; `AudioClipConversion` turns it into an `AudioClip`.
 Nothing in the interface mentions Unity, so the engine itself stays testable.
+
+### A streaming engine
+
+An engine that produces audio faster than it plays but not all at once — a neural
+synthesiser answering over HTTP with PCM as it is generated — implements
+`IStreamingTTSEngine` as well. The session then starts the speaker on the **first chunk**,
+while the rest of the sentence is still being produced; that is where the time to first
+audio goes down. Everything in the plugin calls `SpeechSynthesis.Run`, which uses the
+streaming overload when an engine has it and wraps the one-buffer contract into a single
+final chunk when it does not, so both kinds of engine are complete on their own.
+
+What travels with a request, all optional except the text:
+
+| `SpeechRequest` | Meaning |
+|---|---|
+| `Text` | the unit to say, already sanitised |
+| `LanguageCode` | the language it is in — filled from the language runtime when the caller did not say |
+| `VoiceId` | the voice as the engine names it: the language definition's *TTS voice id*, a speaker name, a preset. Piper takes a voice file name here |
+| `Style` | a delivery hint for engines that accept one; ignored otherwise |
+| `SpeakerId` | the integer selector of the original contract, still honoured |
+
+The rules for chunks: in order, one sample rate and channel count per request, the last one
+marked `IsLast`; on failure log once and finish, do not invent a chunk; honour the
+`CancellationToken` at the next opportunity, because `Cancel()` on the session is a player
+who wants silence now; and stay ahead of real time — a chunk that arrives after the play
+head has passed its position is heard as a gap. A unit longer than the session's
+`MaxUnitSeconds` (30 s) is cut, and a unit that takes longer than its
+`UnitSynthesisTimeoutSeconds` (60 s) is abandoned, subtitle-only.
+
+An engine that serves every language from one running process returns `false` from
+`RestartOnLanguageChange`. The manager then calls `SetLanguage` on a language change and
+nothing else: no stop, no start, no loading overlay. Piper keeps the default, because a
+Piper process is one voice.
+
+Give the engine an id. `INamedTtsEngine` is one property — `EngineId => "voicevox"` — and
+it is what the language definition's *TTS engine id* refers to: a language whose definition
+names an engine reaches it **without a row in the TTS manager's binding table**. Piper's id
+is `piper`, which is why a new Piper-voiced language is one asset and no wiring. A row, when
+present, still wins.
+
+Two more things the plugin does for you here. A crash watchdog that must not resurrect a
+process while another engine is speaking implements `IActiveAwareEngine` and is handed the
+question "am I active?" by the manager. And `StreamingSpeechSession` takes a `SpeechRequest`
+as its voice template — `new SpeechRequest("", speakerId, languageCode, voiceId, style)` —
+so a character's language, voice and style ride with every unit.
 
 ### The worked example: VOICEVOX
 
@@ -213,7 +289,8 @@ What the implementation does, before the code itself:
 2. **`Synthesize`** is two calls: `POST /audio_query` for the prosody object, then
    `POST /synthesis` for the WAV. It yields between them, so the frame is never blocked.
 3. **`speakerId`** maps straight onto VOICEVOX's speaker numbers — which is why the parameter
-   exists on the interface at all. Piper ignores it (one voice per process); VOICEVOX needs it.
+   exists on the interface at all. Piper uses it only to choose between its default and its
+   secondary English voice (one process per voice file); VOICEVOX needs it on every request.
 4. **`SetLanguage`** is where a multi-language engine switches; VOICEVOX is Japanese only, so
    this example does not implement `ILanguageAwareEngine`.
 
