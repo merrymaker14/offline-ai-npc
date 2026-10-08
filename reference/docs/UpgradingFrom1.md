@@ -8,7 +8,7 @@ New speech presets use the same 0.6B CustomVoice Q4 talker and Q8 codec at every
 
 The default non-thinking reply profile allows up to 128 generated tokens and carries a one-sentence limit. The limit does not require a 128-token reply. The token ceiling is written to every agent of the LLM when the model starts. The sentence limit is applied by the code that delivers a reply: a **Hello NPC Character** applies it when its **Reply Limits** is **Reply Profile** or **Current Language**, and as shipped speaks every sentence within the token ceiling. Custom presets remain yours. Sampling values typed on an `LLMAgent` take effect in Play only with **Override agent sampling** turned off on the LLM host; it is on by default.
 
-Whisper supplies the optional microphone path in 1.1. Use a multilingual Whisper model when dialogue switches between languages. VoiceDesign is planned for the next version.
+Whisper supplies the optional microphone path in 1.1. Use a multilingual Whisper model when dialogue switches between languages. VoiceDesign is not part of this version.
 
 ## The short path
 
@@ -268,7 +268,6 @@ Older per-user `OfflineAINPC.IncludeInBuild.<assetId>` choices migrate to
 have verified the intended inclusion choices. If saving it throws, the old key and
 previous in-memory value remain available for retry; fix the write problem and select
 the setting again. Check the resulting file and model inclusion in a player build.
-Silent native storage failures still need validation in the actual Unity editor.
 
 Regenerating `required-models.json` now refuses an unreadable file or a schema from a
 newer plugin instead of replacing its metadata. Preserve the file and use a compatible
@@ -463,7 +462,7 @@ also counts toward the budget. Continuations repeat it without rereading provide
 older clients must learn pagination for large results. Other/custom tool outputs and
 runtime/save interfaces are unchanged. See [Agent tools](AgentTools.md).
 
-macOS has not yet been verified for the complete upgraded plugin by the publisher. Test
+macOS is not verified for the complete upgraded plugin by the publisher. Test
 the actual native engine build, Unity backend and player on the target platform before
 promising support for your game. A compiling C# assembly alone is not that validation.
 

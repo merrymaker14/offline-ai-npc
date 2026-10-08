@@ -19,7 +19,7 @@ Start with typed dialogue. Add Whisper when players need a microphone, then choo
 | One voice engine across several supported languages | Qwen3-TTS with a named CustomVoice speaker |
 | No spoken replies | Keep text dialogue; speech output is optional |
 
-The built-in Qwen speech presets use the 0.6B CustomVoice Q4 talker and Q8 codec. New Qwen engine components use the bundled CPU DLL with **External server URL** and **Style** empty, and the existing 1.5-second lead buffer. Serena (`serena`) is the default for every built-in Qwen language and preset. You can choose another of the nine ready speakers; creating a voice from a description (VoiceDesign) is planned for the next version. Delivery instructions require a separately checked 1.7B CustomVoice setup. Check the language, voice terms and response time on your players' hardware; see [Languages](Languages.md), [Hardware tiers](HardwareTiers.md) and [Licensing](Licensing.md).
+The built-in Qwen speech presets use the 0.6B CustomVoice Q4 talker and Q8 codec. New Qwen engine components use the bundled CPU DLL with **External server URL** and **Style** empty, and the existing 1.5-second lead buffer. Serena (`serena`) is the default for every built-in Qwen language and preset. You can choose another of the nine ready speakers; creating a voice from a description (VoiceDesign) is not part of this version. Delivery instructions require a separately checked 1.7B CustomVoice setup. Check the language, voice terms and response time on your players' hardware; see [Languages](Languages.md), [Hardware tiers](HardwareTiers.md) and [Licensing](Licensing.md).
 
 Model Manager downloads the speech model files. The package includes a **Windows x64 CPU Qwen native DLL**; leave **External server URL** empty to use it. The ordinary Qwen route needs no manually started HTTP server, executable or compiler setup. Keep an existing working Piper route. See [the native speech setup](Languages.md#bundled-qwen-native) and [Licensing](Licensing.md).
 
@@ -43,7 +43,7 @@ and a cloud-based agent sends it on to its provider — see [Agent tools](AgentT
 |---|---|
 | **Unity** | 6000.5.7f1 is what this is developed and tested on. 2022.3 LTS or newer should work, but only 6000.5 is verified |
 | **Render pipeline** | any for the runtime, which references no rendering package. The samples are made in URP: World Aware's five props use URP's Lit material, and outside URP the scene's Pipeline Material Fallback object gives them the running pipeline's default material instead of magenta. Built-in and HDRP are not verified |
-| **Platform** | **Windows x64 CPU is the bundled Qwen target.** See the speech setup for its required CPU instructions. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS support is planned for a later version and remains unverified. |
+| **Platform** | **Windows x64 CPU is the bundled Qwen target.** See the speech setup for its required CPU instructions. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS are not verified. |
 | **Disk** | 10 GB free is comfortable |
 | **Graphics** | Choose a model for the available RAM/VRAM and the memory your game needs. **First dialogue** shows catalog options under the current hardware policy; see [Hardware tiers](HardwareTiers.md) |
 | **Internet** | needed for downloads; the configured local engines can run offline. A deliberately selected remote endpoint needs its own connection |

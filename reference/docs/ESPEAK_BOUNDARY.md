@@ -35,10 +35,9 @@ and clear directions accompany the binary offering. Other section 6 methods have
 own conditions. A generic upstream URL or written offer is not automatic compliance.
 
 Archived Piper's 2023.11.14-2 CMake can fetch a moving phonemizer branch. Its tag alone
-therefore does not identify the entire installed stack's Corresponding Source. The
-installed development binaries and 710 dictionary files are hashed in the dated audit;
-their exact source/build linkage remains pending. A version string is supporting evidence,
-not a substitute for that linkage.
+therefore does not identify the entire installed stack's Corresponding Source. A version
+string is supporting evidence, not a substitute for matching the binaries and dictionary
+files you ship to their source.
 
 The current process boundary is designed to keep the plugin separate. Do not infer that
 every proprietary game, modified protocol or combined distribution is automatically
@@ -48,8 +47,7 @@ cleared. The actual combination and redistribution conditions need their own rev
 
 Voice files are a separate question: the dataset licence, fine-tune base and independent
 weight terms need review. A Chinese pinyin route or an unused espeak backend does not
-remove GPL-covered files that are still present in a distributed Piper folder. This
-audit did not run Piper or test language routing.
+remove GPL-covered files that are still present in a distributed Piper folder.
 
 The [GNU output FAQ](https://www.gnu.org/licenses/gpl-faq.html#WhatCaseIsOutputGPL) generally
 distinguishes output from copyright in program code, with exceptions where protected

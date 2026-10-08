@@ -57,7 +57,7 @@ an agent that runs its model in the cloud sends it on to its provider — see
 Plainly, so nobody is surprised after paying.
 
 **Mobile, web, or console.** This package targets desktop games. Windows has been exercised;
-the complete macOS/Linux path still needs verification with matching native engines and
+the complete macOS/Linux path is not verified with matching native engines and
 a built player. Do not infer verified support from a dependency's platform list.
 Mobile, web and consoles are not currently supported.
 

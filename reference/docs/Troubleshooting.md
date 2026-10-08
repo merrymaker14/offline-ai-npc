@@ -33,7 +33,7 @@ is deliberately not green — "not measured" and "all good" must not look identi
 
 For the included Qwen route, check the native library, supported CPU and talker/codec model files. Read the engine's LastProblem/Console diagnostic. A successful file scan does not prove native generation or sound. For an explicitly configured HTTP URL, check that server and its model separately.
 
-**Windows x64 CPU is the bundled Qwen target.** The bundled DLL works in Unity Editor and Windows players; its required CPU instructions are listed in the speech setup. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS support is planned for a later version and remains unverified.
+**Windows x64 CPU is the bundled Qwen target.** The bundled DLL works in Unity Editor and Windows players; its required CPU instructions are listed in the speech setup. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS are not verified.
 
 ## The character speaks in the subtitle but there is no sound
 

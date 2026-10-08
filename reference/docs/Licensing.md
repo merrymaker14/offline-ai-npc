@@ -14,7 +14,7 @@ The catalogued Qwen3 text GGUF models and Qwen3-TTS CustomVoice talker/codec wei
 
 The qwentts.cpp engine and ggml CPU source use **MIT**. Preserve their copyright and licence notices. Other native dependencies keep their own terms. GPU/vendor runtime libraries require the terms for that particular build; choosing Qwen weights does not license every library in a distribution.
 
-In 1.1, Qwen speech uses named, ready **CustomVoice** speakers. Creating a voice from a description (VoiceDesign) is planned for the next version. See [Qwen speech](QwenUsage.md) for the model-mode boundary.
+In 1.1, Qwen speech uses named, ready **CustomVoice** speakers. Creating a voice from a description (VoiceDesign) is not part of this version. See [Qwen speech](QwenUsage.md) for the model-mode boundary.
 
 ## Whisper and text-model integration
 

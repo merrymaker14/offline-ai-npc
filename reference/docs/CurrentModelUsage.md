@@ -20,9 +20,9 @@ New speech presets use the same 0.6B CustomVoice Q4 talker and Q8 codec at every
 
 The default non-thinking reply profile allows up to 128 generated tokens and carries a one-sentence limit. The limit does not require a 128-token reply. The token ceiling is written to every agent of the LLM when the model starts. The sentence limit is applied by the code that delivers a reply: a **Hello NPC Character** applies it when its **Reply Limits** is **Reply Profile** or **Current Language**, and as shipped speaks every sentence within the token ceiling. Custom presets remain yours. Sampling values typed on an `LLMAgent` take effect in Play only with **Override agent sampling** turned off on the LLM host; it is on by default.
 
-Whisper supplies the optional microphone path in 1.1. Use a multilingual Whisper model when dialogue switches between languages. VoiceDesign is planned for the next version.
+Whisper supplies the optional microphone path in 1.1. Use a multilingual Whisper model when dialogue switches between languages. VoiceDesign is not part of this version.
 
-**Windows x64 CPU is the bundled Qwen target.** The required CPU instructions are listed in the speech setup. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS support is planned for a later version and remains unverified.
+**Windows x64 CPU is the bundled Qwen target.** The required CPU instructions are listed in the speech setup. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS are not verified.
 
 ## Qwen: template, response budget and memory
 

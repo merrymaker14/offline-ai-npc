@@ -27,7 +27,7 @@ revision c10ece1aade47bb51c153c893d14e5bf8e5b7117.
 | en_US-libritts_r-medium | Related LibriTTS-R corpus, CC BY 4.0; card records a lessac fine-tune base. LibriTTS-R is distinct from the original LibriTTS corpus. | Check the exact voice publisher's terms and recorded fine-tune-base terms. |
 | ru_RU-dmitri-medium / es_ES-davefx-medium | Cards label their datasets CC0 and identify a lessac fine-tune base. | Check the exact voice publisher's terms and recorded fine-tune-base terms. |
 | es_ES-sharvard-medium | Dataset CC BY 3.0, two speakers; card identifies a lessac fine-tune base. | Check the exact voice publisher's terms and recorded fine-tune-base terms; retain applicable attribution and notices. |
-| en_US-amy-medium | Dataset URL leads to a repository-wide CC BY-SA label; per-voice statement remains unresolved; lessac base recorded. | Check the per-voice publisher's terms and recorded fine-tune-base terms. |
+| en_US-amy-medium | Dataset URL leads to a repository-wide CC BY-SA label; the voice has no statement of its own; lessac base recorded. | Check the per-voice publisher's terms and recorded fine-tune-base terms. |
 | en_US-hfc_female-medium | NonCommercial dataset terms; lessac base recorded. | Check the stated NonCommercial scope and the exact weight publisher's terms before commercial distribution. |
 | zh_CN-chaowen-medium | Card records a Xiao Ya fine-tune base; archived Xiao Ya card names NonCommercial BZNSYP. | Check the stated NonCommercial scope and the exact weight publisher's terms before commercial distribution. |
 

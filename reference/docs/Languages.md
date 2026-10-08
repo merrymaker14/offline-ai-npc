@@ -7,7 +7,7 @@ Built-in language definitions cover English, Spanish, Japanese, Russian and Simp
 ---
 
 <a id="tier-1--ready-out-of-the-box"></a>
-In 1.1, choose a ready CustomVoice speaker. Creating your own voice from a description (VoiceDesign) is planned for the next version.
+In 1.1, choose a ready CustomVoice speaker. Creating your own voice from a description (VoiceDesign) is not part of this version.
 
 ## Tier 1 — ten languages from one installed engine
 

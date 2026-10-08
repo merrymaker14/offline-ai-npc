@@ -45,8 +45,8 @@ All notable changes to the plugin. The format follows Keep a Changelog.
 - Hello NPC **Reply Limits**: Token Ceiling Only (the default: every sentence within the
   token ceiling is spoken), Reply Profile (the profile's sentence limit ends the reply) or
   Current Language (the language definition's Max tokens and Max sentences).
-- Whisper remains the optional speech-recognition integration. VoiceDesign is planned
-  for the next version.
+- Whisper remains the optional speech-recognition integration. VoiceDesign is not part of
+  this version.
 
 ### Fixed
 - Selected microphone names now control the shared recorder. Missing named devices

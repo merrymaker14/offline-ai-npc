@@ -1,6 +1,6 @@
 # Qwen speech: language, voice and style
 
-In 1.1, choose a ready CustomVoice speaker. Creating your own voice from a description (VoiceDesign) is planned for the next version.
+In 1.1, choose a ready CustomVoice speaker. Creating your own voice from a description (VoiceDesign) is not part of this version.
 
 For the current Unity Qwen3-TTS component, start with a **CustomVoice** talker and
 leave **Style** empty. For the overall model workflow, see
