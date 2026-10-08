@@ -4,138 +4,111 @@ Every limit here is stated with its mitigation where one exists, and stated bare
 does. The goal is that you are never surprised — not that every sentence carries a
 disclaimer.
 
-All figures come from measurements on an **RTX 3060 Laptop (6 GB VRAM), 32 GB RAM, Qwen3-4B
-Q4_K_M with all 36 layers on the GPU**. Your numbers will differ; the tooling that produced
-these is in the package (`Tools ▸ Offline AI NPC ▸ Live verification`) so you can produce
-your own.
+Check the complete conversation on your target machine while the game is rendering.
+**Tools ▸ Offline AI NPC ▸ Live verification** measures a character's turn to synthesized
+audio; for the player's full wait, also measure recognition and the start of playback.
 
 ---
 
 ## Concurrency
 
-**The limit.** All characters share one model server and requests serialise. Measured, same
-mode both rows:
+**Shared-server contention.** Characters on one LLMUnity server can compete for generation.
+The server's concurrency setting and the hardware determine whether requests queue and how
+quickly they finish. Separate hosts have their own memory cost. Test simultaneous turns
+with your actual model, voice and game workload.
 
-| | Median to first audio |
-|---|---|
-| One character generating | 2.4 s |
-| Player's turn while background characters generate | **12.7 s** |
-
-Roughly 5×. The worst single turn in that contended run took 125 s. These two rows were
-measured once, in the demo project, with several characters generating on a timer; the
-shipped latency runner measures one character and cannot reproduce them — the 2.0 s figure
-on the other pages is the one it reproduces.
+**Bundled Qwen speech.** The native route allows only one initialized context per process
+and synthesizes requests sequentially. Starting a second native engine is refused
+while the first still owns its context. Before replacing it, await successful
+completion of the first engine's `StopAsync`. Each `SpeechRequest` can select its
+own language and voice.
 
 **The mitigation.** Suspend background conversation the moment the player starts speaking,
 rather than when their speech has been transcribed — the transcription itself takes seconds
 you have already lost.
 
 ```csharp
-// The player pressed push-to-talk. Everything else stops generating NOW.
-_pushToTalk.RecordingStarted += () => _ambientChatter.Suspend();
-_dialogue.ReplyFinished     += () => _ambientChatter.Resume();
+// An illustration: _ambientChatter and _dialogue stand for your own components;
+// Begin and End are Push To Talk's, driven from your input with Listen To Key off.
+void OnTalkPressed()
+{
+    _ambientChatter.Suspend();            // everything else stops generating NOW
+    _pushToTalk.Begin();
+}
+void OnTalkReleased() => _pushToTalk.End();
+// ...and once the character has answered, or the press was not sent:
+// _dialogue.ReplyFinished += () => _ambientChatter.Resume();
+// _pushToTalk.Dropped += (_, _) => _ambientChatter.Resume();
 ```
 
-Suspend on the *input* event, not on the transcript — that single change is the difference
-between the two rows above. Waiting for the transcript costs you the whole recognition pass
-before the characters stop talking.
+Suspend on the *input* event rather than waiting for the transcript, so background work
+does not keep competing throughout recognition. Resume ambient conversation when the
+player's turn finishes or their input is dropped.
 
-**What has no mitigation.** Two characters genuinely talking to each other while the player
-also talks. One of the three waits. Design around it.
+**Design consequence.** Concurrent turns can queue on a shared server. Prioritise the
+player's turn and budget background generation; more hardware or a different model setup
+needs its own measurements.
 
 ---
 
 ## Latency
 
-Measured over 21 warm turns, one character, nothing contending, through the shipping path
-(speech starts at the first finished sentence):
-
-| | |
-|---|---|
-| Median to first audio | **2019 ms** |
-| p10–p90 | 1545–2761 ms |
-| Range | 1232–3013 ms |
-| First turn of a session (cold) | **2.1 s** |
-
-Measured 2026-08-16, 21 warm turns, English, the streamed path, on a **cleared history** —
-the run is kept as `docs/measurements/latency_clean-history_streamed_4B_2026-08-16.txt`, and its
-header records the history it started from.
-
-**The slowest warm turn in twenty-one took 3013 ms**, and the spread is narrow — but design
-for the tail rather than the median: a design that cannot absorb an occasional three-second
-pause will feel broken on those turns.
+Time the first turn separately from later turns, and test longer conversations as well
+as an empty history. Measure from the player's input to playback, so recognition, model
+generation and speech synthesis are all included.
 
 **Mitigations.**
-- The cold first turn is prompt-cache warm-up. Fire one throwaway generation during a loading
-  screen or a scene fade and the player never meets it.
+- First-turn delay can include loading, backend initialization and prompt evaluation.
+  Optional warm-up during loading may move some work earlier; it must finish within
+  the real resource and cancellation limits and does not guarantee a fast next turn.
 - Give the character something to do while generating — a glance up, a breath, a posture
   change. Two seconds of a character visibly thinking reads very differently from two seconds
   of a frozen face.
-- Keep the system prompt stable. It is cached; changing it mid-session pays the cold cost
-  again. See [Dialogue](Dialogue.md#the-prompt-cache).
+- Keep the system prompt stable where possible. Cache reuse depends on the backend
+  and context; changing the prefix may require more prompt evaluation. See
+  [Dialogue](Dialogue.md#the-prompt-cache) and [Current model usage](CurrentModelUsage.md).
 
-**What has no mitigation.** The floor is the floor. If you need sub-second responses, this is
-the wrong technology, not the wrong configuration.
+**Design consequence.** Use recorded audio for an immediate alert. Give generated
+conversation a visible waiting state, and check whether its longest pauses fit your scene.
 
 ---
 
-## Speech recognition is a second wait, and it is the larger one
+<a id="speech-recognition-is-a-second-wait-and-it-is-the-larger-one"></a>
+## Speech recognition adds its own wait
 
-Every latency figure above is measured **from the moment text is submitted**. If your player
-speaks rather than types — the configuration this plugin exists for — transcription happens
-first, and it is not free.
+For voice input, recognition happens before the character can answer. Choose the Whisper
+model using both transcription accuracy and turnaround time on your target machine.
+If recognition and generation use the same GPU, test them together. A shopkeeper waiting
+for a spoken order has a different budget from an immediate combat command.
 
-| | |
-|---|---|
-| Whisper-small, one short spoken phrase | **7908 ms and 8004 ms** |
-| Measured | in the interview demo, 2026-08-16, while the language model held the same GPU |
-| What the player experiences | that, and then the figures above |
-
-Two things follow, and neither is a defect in the plugin:
-
-- **The model size is your decision, and it is a real trade.** `tiny` and `base` transcribe
-  several times faster and get more words wrong; `small` is what these numbers came from.
-  Wrong words are worse than they sound here, because the transcript is what the character
-  answers — a misheard question produces a confident answer to something nobody asked.
-- **It shares the GPU with the language model.** These numbers were taken with both resident,
-  which is the shipping configuration; recognition alone on an idle machine is faster.
-
-The plugin reports the generation half through `StreamingSpeechSession.TimeToFirstAudioMs`,
-measured from the first unit enqueued. Recognition happens before that and belongs to your
-code, so time it there if you want to show the whole trip.
+`StreamingSpeechSession.TimeToFirstAudioMs` starts at the first unit enqueued for speech.
+It does not include recognition or the LLM wait before that first unit. Measure from the
+player's input event through the first audible playback to report the complete path;
+keep those timestamps separate from this speech-session metric.
 
 ---
 
 ## Switching language mid-session
 
-Changing language stops and restarts the speech engine with a different voice model, and
-invalidates the prompt cache. Rapid switching is coalesced — only the final selection is
-applied — so a settings dropdown being dragged does not queue up five restarts.
+Changing language can change the cached prompt prefix; with Piper it also stops and restarts the
+engine with a different voice model, while Qwen3-TTS switches in place. Rapid switching is
+coalesced — only the final selection is applied — so a settings dropdown being dragged does
+not queue up five restarts.
 
-**How much the prompt-cache half costs was measured, and the honest answer is "it depends on
-your prompt, and often it is lost in the noise".** Six passes, 4B, short system prompts: the
-first turn after a switch came out anywhere from 1080 ms FASTER to 2550 ms slower than the
-warm average, because reply-length variance is larger than the effect. With this project's
-full system prompt — persona, memory replay, action verbs — the first turn of a session
-costs about 2.1 s, and a language switch pays that again.
-
-The rule to take away is not a number: **the bigger your system prompt, the more a language
-switch costs, so switch on a menu screen rather than mid-conversation.**
+A changed prefix can require additional prompt evaluation. Measure language switching
+with your chosen backend and model; use a menu screen if avoiding new work during a
+conversation matters.
 
 ---
 
 ## Desktop only
 
-Windows, macOS and Linux. Not mobile, not web, not console. The model file is gigabytes and
-the speech engines are external processes; neither survives those platforms.
+**Windows x64 CPU is the bundled Qwen target.** The bundled DLL works in Unity Editor and Windows players; its required CPU instructions are listed in the speech setup. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS support is planned for a later version and remains unverified.
 
-Within desktop, one more line: the shipped Piper driver looks in `StreamingAssets/piper/`
-for `piper.exe` on Windows and for `piper` on macOS and Linux, and **only Windows has been
-exercised**. The language model and recognition are cross-platform; on another desktop
-platform put the matching Piper release there and test it before relying on it, or bring
-your own engine.
+Model Manager downloads the speech model files. The package includes a **Windows x64 CPU Qwen native DLL**; leave **External server URL** empty to use it. The ordinary Qwen route needs no manually started HTTP server, executable or compiler setup. Keep an existing working Piper route. See [the native speech setup](Languages.md#bundled-qwen-native) and [Licensing](Licensing.md).
 
-No mitigation for the platform list. It is not on a roadmap.
+**For Qwen speech**, keep the included Windows x64 native plugin and its five licence notices in the distribution; obtain the talker/codec through the configured player model locations or selected Model Manager build copies. The DLL is a Unity native plugin, not a manually copied server executable. The interview demo, built as a Windows player from this delivery, loads the DLL and speaks through it; test your own player build as well. For an explicitly configured external server, separately supply and test that server and its dependencies.
+
 
 ---
 
@@ -145,9 +118,9 @@ A language model produces different text every run, occasionally something off-k
 will not deliver an authored line verbatim.
 
 **Mitigations.**
-- Grammar constrains the *shape* of a reply — one sentence, a well-formed action payload —
-  reliably, because tokens that would break the shape have no probability left. See
-  [Actions](Actions.md).
+- Grammar constrains the *shape* of a reply — a well-formed action payload — reliably,
+  because tokens that would break the shape have no probability left. It does not bound
+  how long the prose runs. See [Actions](Actions.md).
 - The token ceiling and sentence limit are what actually keep replies short. **Small models
   ignore worded length instructions**: "reply in one short sentence" in a persona is a
   suggestion, the ceiling is not. Tune the ceiling, not the wording.
@@ -164,10 +137,10 @@ This one is easy to overstate in either direction, so precisely:
 | | Reliability |
 |---|---|
 | A state value, its band, and its threshold event | **Exact, every time** |
-| A state descriptor changing how the model *speaks* | **~6 times in 10** (0 with the system off) |
+| A state descriptor changing how the model *speaks* | Depends on the model and prompt |
 
-Measured by asking the character directly about her state. The deterministic half is a
-mechanism you can build on; the speech colouring is a bonus that does not always arrive.
+Use state values and band events to drive game behaviour. The model may reflect a state
+hint in its reply, but that wording is not deterministic.
 
 **The rule that follows: every visible consequence of state must have a deterministic
 cause.** If a character's tiredness matters, show it in posture, pacing or an event — and let
@@ -178,25 +151,38 @@ will feel unreliable exactly when someone is judging it.
 
 ## Perception is opt-in, and matters more than it sounds
 
-Without it, characters invent surroundings. Measured, same scene, same model:
-
-- **Perception off:** the character mentioned a fireplace, a window seat and a cat. None
-  existed.
-- **Perception on:** she spoke only about objects that were actually in the room.
+Perception gives the model an object snapshot from your scene. It can still invent details;
+inspect the snapshot and validate important game facts in code.
 
 **Mitigation:** turn it on. See [Perception](Perception.md). The cost is a coarse-timer
 recompute, not per-frame work.
 
 ---
 
-## Voices come in pairs, and a missing partner is silent
+## Voices come in pairs
 
-Every Piper voice is two files: `name.onnx` and `name.onnx.json`. **If the `.json` is
-missing, synthesis produces silence and no error** — the engine starts, reports ready, and
-says nothing.
+Every Piper voice is two files: `name.onnx` and `name.onnx.json`. A missing config caused
+silent synthesis in earlier integrations. The current Piper driver checks the paired
+config before spawning a voice for synthesis, reports the problem and refuses that
+request. Setup and local import checks also validate the pair. These checks do not
+prove that the native executable can synthesize on the target machine.
 
 **Mitigation:** the setup checker (`Tools ▸ Offline AI NPC ▸ Check my setup`) reports an
 unpaired voice as a problem. Run it after adding any voice.
+
+Piper 1.2.0 can also miss its output file when Unity's temporary folder path contains
+letters outside plain ASCII, such as a Cyrillic user name; every line then ends in a
+synthesis timeout. See [Troubleshooting](Troubleshooting.md#piper-is-silent-and-every-line-ends-in-a-synthesis-timeout).
+
+---
+
+## Model folders cannot be reached through a link
+
+Model files are written, copied and deleted only along ordinary folders, so a junction or
+symbolic link cannot send them somewhere else. Downloads and imports refuse a models folder
+reached through a link, an import refuses a file picked through one too, and a build that
+includes models refuses a project opened through one. A build that includes no model is not
+affected. Choose ordinary paths, or open the project from its real folder.
 
 ---
 
@@ -206,7 +192,7 @@ Decided per subsystem, because the right answer differs.
 
 | Subsystem | Clock | At `timeScale = 0` |
 |---|---|---|
-| State axes (decay, needs) | scaled | **Freeze.** She does not get sleepier while the player is in a menu |
+| State axes (decay, needs) | scaled | **Freeze.** The character does not get sleepier while the player is in a menu |
 | Perception | scaled | **Freezes**, consistently with state |
 | Speech queue | **unscaled** | **Keeps running** — see below |
 | Speech-process watchdog | unscaled | **Keeps running.** An external process lives on wall clock |
@@ -220,9 +206,9 @@ Scale those timers instead and the failure is quiet: audio runs while the code w
 it stands still, the subtitle hangs on screen, the queue never advances and the session
 never ends. Worth knowing if you write your own queue.
 
-Generation is not cancelled on pause because it has already been paid for, and cancelling
-would cost a cold prompt cache (~2.1 s) on resume for no benefit. If your game wants a
-pause to abandon the reply, call `Cancel()` on the session yourself.
+Generation continues during pause by policy. Cancelling discards the in-flight reply
+and may require work later; it does not imply a fixed cache-miss cost on resume. If
+your game wants a pause to abandon the reply, call `Cancel()` on the session yourself.
 
 **Behavioural verification of this needs Play mode.** The decisions above are implemented
 and reasoned; watching a menu open mid-reply is not something a unit test can do.
@@ -231,9 +217,10 @@ and reasoned; watching a menu open mid-reply is not something a unit test can do
 
 ## Verification needs Play mode for dialogue
 
-Voices can be auditioned from the editor without entering Play mode. **Dialogue cannot.** The
-language model is constructed in `Start()` and its continuations only run inside the player
-loop, so a live dialogue check requires Play mode.
+Live verification generates a reply before it voices it, and the language model is
+constructed in `Start()` with its continuations running only inside the player loop. So
+Hello NPC and most characters are checked only in Play mode. Outside it, **Advanced ▸ Speak
+one line (Piper)** says a fixed sentence through Piper, with no language model.
 
 No mitigation — it is how Unity's lifecycle works. Documented so the tooling's scope is not
 mistaken for a bug.
@@ -248,7 +235,10 @@ Named so you do not go looking:
 - **Lip sync.** The plugin does not ship a solution. The Interview demo animates mouth
   frames from the audio it plays, and a rig with a jaw bone can be driven the same way from
   the playing `AudioSource`.
-- **Emotion or voice-style control in TTS.** Piper voices have a fixed delivery.
+- **Emotion control in TTS beyond a delivery hint.** Official 1.7B CustomVoice supports
+  an optional *Style* instruction; 0.6B CustomVoice has no official instruction control.
+  This is separate from VoiceDesign and cloning; see [Qwen speech settings](QwenUsage.md).
+  There is no per-word prosody control, and Piper voices have a fixed delivery.
 - **Streaming speech recognition.** Recognition runs on a finished utterance, not
   continuously.
 - **Turn history in the prompt debugger.** The debugger exists and IS broken down by

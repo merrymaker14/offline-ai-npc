@@ -2,399 +2,83 @@
 
 All notable changes to the plugin. The format follows Keep a Changelog.
 
-## [Unreleased]
+## [1.1]
 
-### Fixed — perception
-- The promise "does not invent, does not deny" now holds. A snapshot that is cut to the
-  token budget says how many objects were left out (`PerceptionSnapshot.Omitted`,
-  `IsTruncated`) instead of silently listing fewer; the grammar is narrowed AND widened as
-  objects come and go, so a name that fell out of the block is not a name the model can
-  still say — and one that came back is.
-- `AimPosition` is measured against every renderer, not the first, and is no longer cached
-  across moves. A prop whose pivot sits on the floor is aimed at its visible centre, so it
-  is no longer "hidden" by the floor it stands on; the inspector stops warning about pivots
-  and says the one thing that still matters: a marker with no renderer is aimed at its pivot.
-- `PoiRegistry.Raise` reached nobody. Actions are now delivered to their target through
-  `IActionReceiver`: a point of interest raises `OnNpcInteract` and marks the interaction
-  itself, without the game having to.
-- Affordances are enforced by the parser: a target that restricts its verbs
-  (`IVerbRestrictedTarget`) is not resolvable under any other verb.
-- Connecting words ("and 3 more", "nothing nearby", separators) are per language through
-  `PerceptionPhrasing`, overridable per project; `For()` returns a copy so one character's
-  edits do not leak into the next.
+### Added
+- First-dialogue setup: choose a Hello NPC and an existing catalog model, preview the
+  assignment and apply it with Undo. Start with a typed reply; speech and microphone
+  setup are optional.
+- Qwen3-TTS's ordinary local route includes a Windows x64 CPU native DLL. With an empty
+  External server URL it needs model downloads, not a manually built or launched
+  tts-server executable. A nonempty URL / AttachTo keeps optional external HTTP support.
+  Existing Piper selections, voice pairs and buffered speech engines remain supported.
+- Native Qwen cancellation requests cooperative cancellation and awaits actual generation,
+  callbacks and worker settlement before context free; a cancelled presentation is not
+  proof of native release.
+- Optional Push To Talk with Whisper Speech Recognition, including recording feedback
+  and a recognition-language setting for each input control.
+- Editor windows, inspectors and guides in English, Russian, Spanish and Simplified
+  Chinese. Optional editor MCP tools start disabled and are excluded from player builds.
+- Public turn, input and startup-state hooks for custom game UI; background model-file
+  imports with progress and cancellation, plus assignment of an existing GGUF.
 
-### Added — actions
-- **`ActionTurn`**: one reply's worth of action handling — grammar on, act on the block
-  exactly once however often the stream calls back, the one repair round with the
-  action-only grammar, grammar off in `Dispose`. The documentation promised this pipeline;
-  the code left every project to assemble it. The HelloNpc sample now runs it.
-- `StreamingReplyParser.TryTakeMetadata` hands the block over once, which makes "dispatch
-  once per reply" the natural code instead of a flag.
-- `ActionPhrasing`: the prompt frame ("Available actions", "never read the action line
-  aloud") and the repair prompt in the character's language for the five shipped codes.
-- `ActionIdentifiers.Normalize` derives an id from a display name the same way everywhere;
-  an Action Target with an empty id uses it, and warns about an unusable explicit id while
-  the designer is typing.
+### Compatibility
+- Existing `Say`/`TrySay` calls, event bindings and working Piper setups remain supported.
+  See [Upgrading from 1.0](Documentation/UpgradingFrom1.md) before replacing package assets.
+- Service menu items move under **Tools ▸ Offline AI NPC ▸ Advanced**. Publisher build
+  scripts using removed export/documentation helpers need the migration in that guide.
+- The included Qwen DLL targets Windows x64 CPUs with AVX2, BMI2, FMA, F16C and SSE4.2.
+  The DLL runs inside Unity Editor and Windows players. macOS/Linux
+  libraries are not included. Validate the actual model, Unity backend and target Player.
+- Empty-URL Qwen scenes now select the DLL route; existing Piper bindings are not switched
+  automatically. Keep serialized settings and custom engine routes when updating.
 
-### Fixed — actions
-- **Grammar holes.** Free text could contain `{` or `}` and end the block early for every
-  brace-counting reader; an `Optional` target with nothing registered produced an empty
-  `target ::=` rule that matched the empty string; two optional parameters were nested, so
-  the second was unreachable without the first; `look_at` and `look-at` collapsed to the
-  same rule name and llama.cpp silently kept one. Text excludes braces, the optional group
-  is left out with no targets, optional parameters are an independent ordered subset, and
-  rules are named by position.
-- Speech can no longer be blank (whitespace only); a leading space is still allowed
-  because tokenizers glue one onto the first word.
-- `ActionSchema.IsEmpty` was always true for a per-character view. `Clear()` on a view no
-  longer wipes the shared vocabulary. The prompt's example is built from a verb that is
-  actually listed. `SetVerbFilter` takes a revision *function* (`() => gate.Revision`) so
-  the cached grammar rebuilds exactly when the filter's answer can change; the `int`
-  overload is obsolete.
-- Parameter names and choice values are validated at registration — a quote in a choice
-  used to produce a grammar that failed to compile on the player's machine. An axis whose
-  id cannot be a grammar literal is left out of `feel` with a warning instead of throwing.
-- A leading block that names no `"verb"` (an emoticon in braces) is not an attempted action
-  and earns no repair round. The repair reply's block is the first JSON object, not the
-  first brace, and braces inside its strings do not end it. The streaming parser applies
-  the same rule to the block it holds back.
-- `ActionTargetRegistry.Register` of the same object under the same id no longer bumps the
-  revision (perception re-registers everything in range on every recompute), and an
-  unusable id is refused with a warning once instead of silently.
-- `LLMUnityGrammarBinding` deduplicates against the client's own `grammar`, so a grammar
-  typed into the LLMUnity inspector is seen and cleared like any other.
-- `NpcActions` resets when Play starts, like every other static. `NpcAction.TargetId`
-  answers `""` for a destroyed target instead of throwing.
+### Default profiles
+- New Qwen speech presets use 0.6B CustomVoice Q4 with the Q8 codec across LLM tiers.
+  New Qwen engines use the CPU DLL with External server URL and Style empty;
+  existing serialized settings remain.
+- Serena is the default speaker for every built-in Qwen language and preset.
+- The non-thinking reply profile has a 128-token ceiling and a one-sentence delivery
+  limit. Assign `Tiers.Sampling` to replace it; turn **Override agent sampling** off on
+  the LLM host to keep the values typed on each agent. Larger talkers and GPU are manual
+  options.
+- Hello NPC **Reply Limits**: Token Ceiling Only (the default: every sentence within the
+  token ceiling is spoken), Reply Profile (the profile's sentence limit ends the reply) or
+  Current Language (the language definition's Max tokens and Max sentences).
+- Whisper remains the optional speech-recognition integration. VoiceDesign is planned
+  for the next version.
 
-### Added — editor
-- **`LLMUnityLiveVerificationAdapter`.** Live verification and the prompt debugger asked
-  for a component the package did not ship; the only implementation lived in the demo
-  project. The adapter drives an `LLMAgent`, the perception and state components beside
-  it, and the active voice engine — and the empty state names it.
-- `TranscriptCleaner` strips a recogniser's non-speech annotations (`(coughs)`,
-  `[BLANK_AUDIO]`, `*sighs*`, notes) and says whether anything was said; the
-  troubleshooting page pointed at demo code for this.
-- `PluginPaths` finds the plugin's folder from its assembly definition, so the editor
-  tools survive the folder being moved or renamed.
+### Fixed
+- Selected microphone names now control the shared recorder. Missing named devices
+  report a capture error; changing inputs retires unfinished recordings and stale recognition.
+- Borrowed LLM clients track their native owner. Calls after owner disposal are rejected
+  before entering the native library; active calls settle before the context is released.
+- Invalid or partially allocated LoRA paths release only initialized buffers; failed
+  command-based model creation releases its native library.
+- Native LLM replies, history and status strings release their owned buffers after
+  copying, including failure paths, while borrowed callback strings remain untouched.
+- Windows Editor builds release native file handles between transactions under Mono.
+  Build journal updates retry transient access conflicts and preserve changed files.
+- Interrupted Hello NPC replies stop their presentation and keep the character busy
+  until generation settles. Subtitles follow buffered or paused speech.
+- External HTTP Qwen speech requests settle on cancellation, including unfinished HTTP error bodies;
+  truncated fixed-length PCM responses report failure.
+- Conversation memory and character state preserve unread data and ownership during
+  retries and verification; failed state saves remain pending for retry.
+- Model imports, downloads and build staging check file ownership and selected model/
+  voice inputs. Setup reports distinguish file readiness from native startup.
+- Speech sessions advance with `AudioSource.pitch`, so subtitles and the end of a line
+  follow a voice played faster or slower.
+- Reply splitting waits for the next visible character after an ellipsis, and after
+  "No.", "Fig." and "Vol.", before deciding that a sentence ended.
+- A Windows build whose output is not a Player `.exe` (Create Visual Studio Solution, for
+  one) finishes with a warning naming the notice files to copy by hand. A project or build
+  folder under a junction no longer fails the build.
+- Piper removes its own output WAV files older than a day when it starts.
 
-### Fixed — editor
-- **"Check for preset updates" could never succeed**: its private coroutine did not wait
-  for the web request. It uses the shared editor coroutine host; the update URL ships empty
-  and the menu item says so, instead of fetching a page that does not exist.
-- **Every external link was a 404.** Documentation and "how to supply your own voice" open
-  the pages inside the package; support is the publisher's e-mail; the welcome window's
-  primary button is no longer a window that needs setup first.
-- **"What ships in the build" in the Presets window decided nothing.** It now shows what
-  the Model Manager's ticks add up to and hands off; there is one place that decides.
-- `LLMUNITY_PRESENT` is decided from the file system and the package manager, not from the
-  loaded domain, so deleting LLM for Unity removes the define even while the compile is
-  broken; it is set for every build target at once; the version is read from the package
-  manifest or the `package.json` beside a loose install, "3.0.3 or newer" is enforced as a
-  minimum rather than a list, and "found but not compiled in yet" is reported as such with
-  the Re-check menu item as the fix.
-- A single verification and a latency run restore the project's language afterwards; the
-  latency run is tracked by the window (no second generation on the same model, Cancel
-  stops it), clears the history first, and writes JSON that names the machine, model and
-  tier. Outside play mode the window says that dialogue needs Play after a few seconds
-  instead of waiting three minutes; "Load model" no longer reports "loaded" before loading.
-- The verification and prompt-debugger windows refresh on scene changes and play-mode
-  transitions instead of throwing every frame from destroyed characters; the prompt
-  debugger's character list follows Refresh; a verification cell whose configuration cannot
-  be read shows "unknown" rather than staying green.
-- External voice processes are shut down when the editor quits. The packaging boundary test
-  forbids every executable and model format unless allowed by name, and checks the
-  espeak-ng note inside the package. The author's packaging menus no longer ship. "Create
-  demo scene" refuses in Play mode; the welcome window is not marked seen by a batch-mode
-  import; "Check my setup (log to console)" prints at any log level; the addressable-script
-  check says what it does and does not check.
-- The latency run's test lines, the shipped tests and the comments no longer name a
-  particular game.
-
-### Added — hardware tiers
-- **`TierBootstrap` and `LLMUnityHost`.** The documentation described a plugin that probes
-  the machine, picks a tier and starts the right model at startup; the code shipped the
-  cascade and left the host and the driver to each project. Two components on the LLM's
-  object now do it, with the force-tier and fail-starts development hooks as inspector
-  fields instead of undocumented PlayerPrefs keys.
-- `ModelDownloadUrl` turns a catalog's repository URL into the file URL; the shipped
-  catalog carries a SHA-256 for every model.
-- `Tiers.OnTierResolved` calls a late subscriber at once; `Tiers.Reason` keeps the real
-  reason after a downgrade instead of "overridden".
-
-### Fixed — hardware tiers and the Model Manager
-- **No catalog download could ever finish.** The size check compared the exact byte count
-  with the catalog's figure rounded to megabytes, failed for every model, and the retry
-  looped through a 416 back to a fresh download. The size now allows the rounding and the
-  checksum is the verdict; a finished-but-unverified `.part` is verified instead of
-  discarded; plain http is refused; a locked destination no longer costs a re-download.
-- **"Who uses this file" only knew about missing files.** Every installed model read as
-  unused, the delete dialog said nothing referenced it, and `required-models.json` was
-  written empty. The reference scan now collects present and missing alike.
-- **Any string ending in `.bin` blocked the build.** `.bin` counts as a model only with
-  whisper.cpp's `ggml-` prefix; the build gate checks the scenes in the build settings and
-  prefabs rather than whatever is open; the block can be turned into a warning; "Include in
-  build" lives in `ProjectSettings/` so a teammate's or a CI machine's build carries the
-  same models; a staging folder left by a cancelled build is cleaned up.
-- **Crash loops.** The in-progress marker is kept until the first generation survives, a
-  measurement is recorded against the layer count it was taken at (a suggestion to try
-  more travels separately and is measured before it is trusted), a cached count is capped
-  by the current VRAM budget, an empty measurement is no longer cached as "0 tok/s
-  completed", a start timeout moves on to the next model instead of stepping layers down
-  four times, and the cache key includes VR and the context size.
-- The layer tuner sets aside the model's working set (KV cache and buffers, from
-  `expectedVramMB` or estimated from the context size) before dividing the rest into
-  layers; a 16k context on a 6 GB card no longer loads 36 layers and dies.
-- Qwen3-8B's catalog size was 4900 MB against a real 4795, so a correct download was
-  "Damaged". The Light RAM bar is 14 000 MB, admitting a "16 GB" laptop with integrated
-  graphics. VR is re-read on every probe rather than cached from the first frame. Newer AMD
-  integrated GPUs ("Radeon(TM) Graphics", 680M/780M/880M) are recognised as integrated.
-- `GgufReader` refuses arrays nested more than 16 deep instead of overflowing the stack on
-  a crafted file, and reports an absurd length as damage rather than "need more data".
-- The Model Manager window no longer loads every ScriptableObject in the project every two
-  seconds, nor mutes the editor's logger while it does; a header that could not be read
-  keeps its reason on screen.
-
-### Fixed — core
-- **One rule for the end of a sentence.** The reply limiter cut "I ran 3.5 kilometres"
-  at the decimal point and "Dr. Sato" after the title; the streaming parser knew better and
-  the two disagreed on the same text. Both now use `SentenceTerminators.IsSentenceEnd`:
-  decimals, abbreviations (with Russian ones), capital-letter initials only, "?!" as an
-  ending, an ellipsis as a pause unless a capital follows, and no split after a Japanese
-  pause.
-- **`LanguageRuntime.SetCurrent` reaches the voice.** The speech engines default to
-  `LanguageRuntimeSource`, so the one documented call restarts the engine; a host with its
-  own language store still assigns `TTSEngineManager.LanguageSource`.
-- **An empty catalog update no longer erases the catalog.** `{"presets":[]}` was "usable"
-  and merged over every official entry. Empty is refused; a cache that holds only user
-  presets is merged over the embedded copy; the cache is written atomically and an
-  unreadable one is set aside as `.corrupt-<time>.json` instead of being overwritten.
-- `LanguageDefinition` can author the nearby-objects header and the target hint, so a new
-  language's prompt has no English fragments left in it.
-- The built-in catalog no longer names Spanish and Russian Piper voices fine-tuned from a
-  research-only dataset, nor a VOICEVOX speaker; those languages ship configured and
-  voiceless, Simplified Chinese joins them, every built-in language has a length sentence
-  in its own words, and the engine says "no voice is configured" instead of borrowing
-  English's.
-- `LanguageRuntime`: installing a catalog before any language was chosen no longer chooses
-  one and raises `Changed`; an empty catalog is refused; `Current` is never null; an
-  unconfigured code is reported once and `TrySetCurrent` refuses it; one throwing
-  subscriber no longer silences the rest. Regional codes match the same way everywhere
-  (`LanguageCodes`), underscores included.
-- `ExternalProcessLifecycle` tears down what the ledger still holds on play-mode entry
-  instead of forgetting it, which orphaned a voice process started by an editor tool.
-- JSON: a byte-order mark is skipped, non-standard numbers (`+5`, `01`, `.5`, `1.`) are
-  refused, `\u` needs four hex digits, a lone surrogate is escaped rather than replaced,
-  and floats are written as typed (`0.7`, not `0.699999988079071`). The action grammar's
-  number rule matches.
-- `LanguageMigration` no longer treats a stored word like "Japanese" as a language code;
-  `Log.Handler` and `Log.MinimumLevel` reset when Play starts; `PresetCatalogJson` is
-  public; the catalog's Chinese ids and display names are consistent.
-
-### Fixed — state and memory
-- **Persistence could overwrite a save.** A character that came alive before the bootstrap
-  installed `NpcStateComponent.Store` started from defaults and, ten seconds later, saved
-  them over the player's progress. A character now loads the moment a store appears and
-  never writes before it has tried to load. Saves also flush on `OnApplicationPause`.
-- `Import()` replaces the persisted slot instead of merging with the previous one; values
-  for axes the catalog no longer defines are kept and saved back, with a warning naming
-  them, rather than dropped on the first save.
-- `NaN` and infinite values are refused by `Set`, `Modify`, `Tick` and `ImportPersisted`
-  instead of being stored, where nothing behaves afterwards. `Set` from the model obeys the
-  same per-reply clamp as `Modify`.
-- Exceptions from a project's `IStateStore`, `IKeyValueStore`, memory compactor and event
-  subscribers are contained and reported; one throwing subscriber no longer silences the
-  rest, and a broken store costs the memory, never the turn.
-- Every static (`Store`, `Instances`, the verb gate's rules, memory store, compactor,
-  labels and phrasing registrations) is reset when Play starts, so Enter Play Mode without
-  domain reload no longer doubles the gate's rules or keeps last session's store alive.
-- A numeric verb-gate rule (`Require(min, max)`) is re-evaluated on every change of its
-  axis, not only on a band crossing; the cached grammar rebuilds when the answer can differ.
-
-### Changed — state and memory
-- The state block's subject is neutral by default ("this character") and set per character
-  on the component (**Subject in prompt**). Connecting words are per language through
-  `StatePhrasing`, with built-ins for the five shipped languages.
-- The memory replay is labelled per language (`MemoryLabels`: "Player: / You: / Earlier: "
-  and their ru/ja/es/zh equivalents) instead of a hard-coded English "Caretaker:". Projects
-  set `NPCMemory.Labels` once or pass a language code to `GetContextString`.
-- `AxisKind.Trait` is obsolete. It never ticked, was never described and modulated nothing;
-  a disposition is a Trait Preset. Catalogs authored with it still load, and `Validate()`
-  and the inspector say so.
-- `AxisDefinition.Validate()` and the catalog inspector report bands listed out of order,
-  blank or duplicate band ids, a band with max below min, gaps and overlaps, and bands
-  without text; the inspector's texts match what the component does (tick floor 0.1 s,
-  save floor 1 s, a time scale of zero is ignored, no store in Play mode).
-- `StateAxes.Mood` is `"mood"`, matching the sample catalog and `MoodPresentation`. The
-  `feel` verb has Russian and Chinese texts.
-- The LivingCharacter sample catalog has no gaps between bands, neutral band texts, and
-  Russian and Chinese descriptions; a test keeps every shipped catalog passing its own
-  inspector.
-- No more deprecated `FindObjectsByType(FindObjectsSortMode)` calls: `ObjectFinder.All<T>()`
-  compiles clean on 6000.0 and 6000.5.
-
-### Added — speech contract for a streaming engine
-- `IStreamingTTSEngine`, additive to `ITTSEngine`: `Synthesize(SpeechRequest, onChunk,
-  CancellationToken)` delivers audio in pieces, and the session starts the speaker on the
-  first chunk while the rest of the sentence is still being produced. Engines written
-  against the one-buffer contract keep working unchanged.
-- `SpeechRequest` carries the text, the language, a voice id, a style and the legacy speaker
-  id. `StreamingSpeechSession` takes one as its voice template (the old `int speakerId`
-  constructor remains); a missing language is filled from the language runtime. Piper
-  honours a voice id on the request as a voice file name, which makes a language
-  definition's *TTS voice id* reachable per unit.
-- `SpeechSynthesis.Run` / `Collect` are the one way the plugin asks an engine to speak: the
-  streaming overload when the engine has it, the one-buffer contract wrapped into a single
-  final chunk when it does not. A second `onAudio` from a one-buffer engine — which used to
-  overwrite the first buffer unnoticed — is logged and dropped; an engine that throws loses
-  the unit, not the conversation.
-- Cancellation reaches the engine: `Cancel()` on the session cancels the synthesis in
-  flight, and Piper stops polling for the file and removes it. A unit that takes longer than
-  `UnitSynthesisTimeoutSeconds` (60 s) is abandoned, subtitle-only; a streamed unit longer
-  than `MaxUnitSeconds` (30 s) is cut.
-- `ILanguageAwareEngine.RestartOnLanguageChange` (default true). An engine that serves every
-  language from one process returns false; the manager then calls `SetLanguage` and neither
-  restarts it nor shows the loading overlay.
-- `IActiveAwareEngine` replaces the manager's private hook into `PiperEngine`: every engine
-  in the binding table that implements it is told whether it is active, so a second Piper
-  bound to another language gets the watchdog guard too.
-- The latency runner records synthesis-to-first-chunk per turn (`firstChunkMs` in the JSON,
-  a row in the report when it differs from the whole synthesis), so a streaming engine's
-  gain is measured rather than assumed.
-
-### Fixed — state and memory (continued)
-- `SaveNow` no longer writes when the save could not be read. A store that threw on load
-  left the character on defaults and, ten seconds later, wrote those defaults over the
-  player's file; now it says so and waits for the next attempt.
-
-### Fixed — speech
-- A binding row that exists but cannot speak — no engine dragged in, or a component that
-  is not an `ITTSEngine` — is named precisely, once, instead of "No engine bound for 'ja'"
-  sending people to add a second row.
-- A language definition's *TTS engine id* is read. Engines that implement `INamedTtsEngine`
-  (Piper answers to `piper`) are reachable from a definition without a row in the manager's
-  binding table, so a new Piper-voiced language really is one asset and no wiring.
-- A language switch that threw no longer wedges the manager: the in-flight flag is cleared
-  in a `finally`, so the next switch runs instead of queueing behind a dead coroutine.
-- Piper refuses a voice whose `.onnx.json` is missing, empty or unreadable before spawning
-  the process, and says which file — instead of a process that starts, reports ready and
-  synthesises silence. The WAV is loaded through a proper file URI, so a `#` or `%` in a
-  temp path no longer breaks the clip.
-- `UtteranceGate` no longer drops one-character CJK answers («嗯», «네») under the
-  two-character minimum meant for alphabets.
-- A subtitle-only unit is shown for its reading length (about fourteen characters a
-  second, within bounds) instead of a flat 2.5 s; `Cancel()` and the new `Dispose()`
-  release the clip in the air, which a `StopCoroutine` used to leak.
-- `AudioClipConversion.ToClip` drops a unit with a zero sample rate with a warning instead of
-  throwing, and trims a dangling half-frame from an interleaved buffer.
-- HelloNpc no longer reads a faulted task's `Result` — which rethrew, killed the coroutine
-  and left the character busy forever — and the documented controller says why.
-- `SpeakableText` drops what a voice must not attempt: a markdown link keeps its text and
-  loses its address, a bare address is removed, a square-bracketed stage direction
-  (`[laughs]`) is not spoken, a keycap's combining mark leaves nothing behind, and a letter
-  outside the basic plane counts as speech. Round brackets stay.
-- A log handler installed by the host that throws is removed with one console line instead
-  of turning the plugin's contained failure into an uncontained one.
-- Piper polls for its output on real time, so a game paused at `timeScale = 0` no longer
-  freezes a unit mid-synthesis while the process finishes anyway, and the budget is seconds
-  rather than iterations. The pause table in `Limitations.md` is now true for the whole queue.
-- Piper requests are real JSON on one line. A reply carrying a line break, a tab or a stray
-  control character used to split the request or break the parse, and the process spoke
-  half a sentence or died; the request is now written by the plugin's JSON writer, with
-  whitespace controls turned into spaces and the rest dropped.
-- `PiperEngine.StartAsync` initialises its process pool itself, so a host that never ran
-  `Awake` (an editor tool, a component added and started in the same call) no longer
-  reaches a null pool.
-- The microphone is opened by the first push-to-talk recorder, not at application start. A
-  scene with no voice input never touches the device — no permission prompt, no busy
-  microphone, no capture in a menu. `SharedMicLoop.Require()` returns the loop early.
-- `UtteranceGate` tells end-card phrases ("thanks for watching") from ambiguous ones
-  ("okay", "thanks", "bye"). Given the recording's energy —
-  `Inspect(transcript, language, rms)` — an ambiguous phrase is dropped only when the
-  recording was quiet, so a player who audibly said "okay" is heard. The overload without
-  the energy keeps the old strict behaviour. `UseBuiltInPhrases` turns the shipped lists off.
-
-### Changed — speech
-- `ITTSEngine` carries its contract in the XML documentation: `onAudio` at most once and
-  never on failure, `StartAsync` never throws, `StopAsync` safe twice, cancellation leaves
-  the engine usable. Streaming audio inside a unit will arrive as a separate, additive
-  interface rather than by changing this one.
-- `PiperEngine`'s inspector fields describe voices, not characters:
-  `_englishVoiceFile`, `_secondaryEnglishVoiceFile`, `_spanishVoiceFile`,
-  `_secondarySpeakerId`, `_defaultVoiceFlags`, `_secondaryVoiceFlags`, `_spanishVoiceFlags`.
-  Scenes saved with the old names load unchanged (`FormerlySerializedAs`).
-- The TTS manager's default binding table includes `zh-Hans`, which the built-in language
-  catalog already configured.
-
-### Fixed — editor and diagnostics
-- The in-game diagnostics component writes its fixes for a player. `SetupContext.Audience`
-  selects the sentence after each finding: the editor keeps "Open Tools ▸ Offline AI NPC ▸
-  Model Manager"; a shipped game says "Download the language model from the game's menu",
-  and rows only a developer can act on (scene wiring, an unread library version, "press
-  Play once") are left out. The findings themselves are the same code path.
-- A voice's `.onnx.json` is read and parsed, not merely found: an empty or half-written
-  config — the usual leftover of an interrupted download — now fails the setup check with
-  the reason, instead of passing green and producing silence.
-- Piper's paths live in one place, `PiperPaths`: `StreamingAssets/piper/` with `piper.exe`
-  on Windows and `piper` elsewhere, `voices/` beneath it. The engine, the setup check and
-  the "speak one line" menu all read the same answer.
-- "Speak one line": the request is real JSON, the wav loads on the editor's update loop
-  instead of a ten-second busy-wait, the log prefix appears once, the Russian item speaks
-  the voice the language definition names, and the demo's interview line is gone.
-- Window titles match their menu items and the documentation: Welcome, Model Manager,
-  Check my setup.
-- The verification matrix is stored per project in `UserSettings/OfflineAINPC/` (migrated
-  from EditorPrefs once) with an invariant-culture timestamp, so two projects with a
-  character of the same name no longer share cells.
-- The speaker-audition prompt opens centred on the editor instead of at the screen's
-  origin; the editor audio preview releases its held clip before a domain reload; the
-  perception inspector warns when the eye transform is empty and names the head bone
-  when the rig has one; a model folder under `Packages/` is refused like one under
-  `Assets/`; the packaging tests locate the plugin through `PluginPaths`.
-
-### Fixed — samples
-- The HelloNpc scene can talk. It now carries a `Language Model` object — `LLM` (disabled on
-  purpose), `LLMUnity Host`, `Tier Bootstrap` — and an `LLMAgent` on the character wired to
-  it, so "download a model and press Play" is true. The character names the exact missing
-  piece: no agent, no LLM, still starting, failed, or no model for this tier.
-
-### Fixed — documentation and notices
-- The package root README no longer claims the documentation folder may be missing, counts
-  sixteen pages, lists the beginner's guide and the demo page, and gives the online
-  documentation and support addresses.
-- The architecture page (`Documentation/README.md`) describes the current layout — state,
-  perception, actions, models, verification, integrations, samples — and the seams with
-  their defaults, instead of a two-month-old plugin with a Japanese engine it never shipped.
-- Piper's install path is named everywhere it was "somewhere your build can reach":
-  `Assets/StreamingAssets/piper/piper.exe` and `…/piper/voices/`. `Limitations.md` says the
-  shipped Piper driver is Windows as delivered.
-- Where a `.gguf` goes is one answer on every page: the Model Manager's folder, then
-  `persistentDataPath`, then `StreamingAssets`.
-- Downloads are described as they are checked — size and GGUF header always, hash when the
-  preset carries one — rather than as "hash-verified" while the shipped presets carry none.
-- `BeginnerGuide.md` no longer promises the plugin "runs with no GPU at all"; it says when
-  the CPU path applies and that the lowest tier has no model. Its type reference separates
-  assets from things configured in the inspector or code.
-- The contention figures (2.4 s → 12.7 s) are marked as measured once in the demo project;
-  the shipped latency runner reproduces the 2.0 s figure, not those.
-- Every documentation-versus-code row from the audit was walked: the perception page says
-  how candidates are ranked, that occlusion needs the Occluders mask, that the token budget is
-  the second limit, and that the interaction handler must be public; the actions page says
-  the plugin ships one verb (`feel`), when the grammar applies, and how an `IActionHandler`
-  registers; the state page says decay runs on game time; the speech pages say what Piper
-  does with a speaker id and how to prewarm voices; the pivot advice describes the renderer
-  centre the code actually aims at.
-- `Perception.md` describes the truncated block, `Omitted` / `IsTruncated`, the empty-room
-  sentence and `IActionReceiver`. The HelloNpc sample is named where a page said no runnable
-  sample existed. Smaller: the store recipe, the demo's lip-sync note, `Samples/` not
-  `Samples~`, the length instruction's languages, no katakana in the English troubleshooting
-  page.
-- `THIRD_PARTY_NOTICES.md` is an inventory of what the package touches — dependencies,
-  external processes, the three catalog models, the three recommended voices — with the date
-  each licence was read, instead of a working journal with twelve unresolved TODOs, a
-  dependency that no longer exists and voices the plugin never shipped. LlamaLib is
-  Apache-2.0, not MIT. The Qwen3-8B licence and card are archived beside the 1.7B and 4B ones.
-- The 1.0.0 entry below reads as a release description: no development-stage numbers, no
-  classes that belong to the demo project, no tools that are not in the package.
+[Detailed 1.1 history and historical measurements](CHANGELOG-1.1-DETAILS.md) preserves
+the full development record. See [Licensing](Documentation/Licensing.md) for the current
+dependency and model records.
 
 ## [1.0.0] — 2026-08-17
 
@@ -486,7 +170,7 @@ what they are getting.
   it. The block states only what has actually moved, ranked by how far from baseline, and
   is capped at two clauses.
 - `StateVerbGate` filters the VERB list from state the way perception filters targets: an
-  exhausted character is not asked to decline to look around — the verb is absent from her
+  exhausted character is not asked to decline to look around — the verb is absent from the character's
   grammar. Verbs by state, targets by perception, composing without knowing about each
   other.
 - The model's own way in is the `feel` action, whose `axis` parameter is a grammar CHOICE
@@ -535,10 +219,10 @@ what they are getting.
 - Output format: an OPTIONAL leading `{"verb":…}` line, then free prose. Leading, so the
   action is known before the first word is spoken; optional, so ordinary conversation
   stays ordinary. The grammar forbids prose from starting with `{` and forbids an action
-  with no speech after it — she can never act and then fall silent.
+  with no speech after it — the character can never act and then fall silent.
 - `GbnfWriter` builds the grammar from the schema. Unregistered targets and values
   outside a `Choice` list are not merely discouraged, they are unreachable.
-- `ActionParser` validates and resolves the block, and NEVER throws — she is already
+- `ActionParser` validates and resolves the block, and NEVER throws — the character is already
   talking by the time it runs. `ActionRepair` supplies the single corrective round,
   which asks for the action alone and then gives up silently.
 - `ActionDispatcher` delivers a resolved action three ways: a UnityEvent for inspector

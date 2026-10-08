@@ -1,21 +1,39 @@
 # Beginner's guide
 
-The long way round, assuming you have never installed a Unity package with external
-dependencies. It starts with an empty project and ends with a build you can hand to
-somebody else. Allow an hour; most of it is downloads.
+Start here if you have not installed a Unity package with external dependencies before.
+The first goal is one typed question and one text answer in Hello NPC. After that, add
+voice, microphone input or your own character, then make a player build. Download and
+setup time depend on your connection, hardware and the features you choose.
+
+**After installation:** follow [the first text dialogue steps](#first-text-dialogue) in one setup window.
 
 ---
 
+### Choose a speech setup for your game
+
+Start with typed dialogue. Add Whisper when players need a microphone, then choose a ready voice:
+
+| Your priority | Start with |
+|---|---|
+| A quick reply and a suitable voice for your language | Piper with that voice's `.onnx` / `.onnx.json` pair |
+| One voice engine across several supported languages | Qwen3-TTS with a named CustomVoice speaker |
+| No spoken replies | Keep text dialogue; speech output is optional |
+
+The built-in Qwen speech presets use the 0.6B CustomVoice Q4 talker and Q8 codec. New Qwen engine components use the bundled CPU DLL with **External server URL** and **Style** empty, and the existing 1.5-second lead buffer. Serena (`serena`) is the default for every built-in Qwen language and preset. You can choose another of the nine ready speakers; creating a voice from a description (VoiceDesign) is planned for the next version. Delivery instructions require a separately checked 1.7B CustomVoice setup. Check the language, voice terms and response time on your players' hardware; see [Languages](Languages.md), [Hardware tiers](HardwareTiers.md) and [Licensing](Licensing.md).
+
+Model Manager downloads the speech model files. The package includes a **Windows x64 CPU Qwen native DLL**; leave **External server URL** empty to use it. The ordinary Qwen route needs no manually started HTTP server, executable or compiler setup. Keep an existing working Piper route. See [the native speech setup](Languages.md#bundled-qwen-native) and [Licensing](Licensing.md).
+
 ## 0. What this is, in one paragraph
 
-Your character talks. The language model, the speech recognition and the speech synthesis
-all run **on the player's own machine** — no cloud, no API keys, no per-token bill, no
-telemetry, and it works with the network cable pulled out. What you install is: a model
-runner, a model file, a voice, and this plugin to hold them together.
+With the default local configuration, your character talks. The language model, the speech
+recognition and the speech synthesis all run **on the player's own machine** — no cloud, no
+API keys, no per-token bill, no telemetry, and it works with the network cable pulled out.
+For text dialogue you install a model runner, one model file and this plugin. Voice and
+microphone input add their own optional engines and files. One editor-only exception is
+yours to choose: the optional MCP server hands project data to the coding agent you connect,
+and a cloud-based agent sends it on to its provider — see [Agent tools](AgentTools.md#safety).
 
-**What you will have at the end of this page:** a scene where you type or speak a question
-and a character answers you out loud, and a build of it that runs on a machine without
-Unity.
+**First milestone:** compatible LLM for Unity → **Set up first dialogue** → one model → Play → a typed question and a text answer. Voice and microphone input are optional next steps.
 
 ---
 
@@ -24,14 +42,14 @@ Unity.
 | | |
 |---|---|
 | **Unity** | 6000.5.7f1 is what this is developed and tested on. 2022.3 LTS or newer should work, but only 6000.5 is verified |
-| **Render pipeline** | any — Built-in, URP, HDRP. The runtime references no rendering package |
-| **Platform** | Windows, macOS or Linux **desktop**. Not mobile, not web, not console, and that is a hard limit — the model is gigabytes and the speech engines are separate processes |
+| **Render pipeline** | any for the runtime, which references no rendering package. The samples are made in URP: World Aware's five props use URP's Lit material, and outside URP the scene's Pipeline Material Fallback object gives them the running pipeline's default material instead of magenta. Built-in and HDRP are not verified |
+| **Platform** | **Windows x64 CPU is the bundled Qwen target.** See the speech setup for its required CPU instructions. macOS/Linux native libraries are not included. Mobile, web and consoles are not supported by this package. Linux and macOS support is planned for a later version and remains unverified. |
 | **Disk** | 10 GB free is comfortable |
-| **Graphics** | 6 GB of VRAM fits a 4B model entirely on the card. Without a usable GPU it runs on the CPU only with 16 GB of RAM and four cores, slowly; below that the lowest tier has no language model at all — see [Hardware tiers](HardwareTiers.md) |
-| **Internet** | for the downloads on this page only. Never at runtime |
+| **Graphics** | Choose a model for the available RAM/VRAM and the memory your game needs. **First dialogue** shows catalog options under the current hardware policy; see [Hardware tiers](HardwareTiers.md) |
+| **Internet** | needed for downloads; the configured local engines can run offline. A deliberately selected remote endpoint needs its own connection |
 
 If any of those are a problem, read [Is this for your game?](IsThisForYourGame.md) before
-spending the hour.
+installing the dependencies or downloading large files.
 
 ---
 
@@ -39,8 +57,9 @@ spending the hour.
 
 New project, any template. Nothing here depends on which.
 
-Adding this to a project you already have is fine too: no step on this page edits your
-Project Settings, your scenes or your existing assets.
+You can also use an existing project. Importing the package adds its assets; opening the
+sample may ask you to save the current scene. Setup changes and build inclusion are
+explicit actions. Keep your existing scene and model/voice bindings when adapting the sample.
 
 ---
 
@@ -57,140 +76,177 @@ form a sentence.
 **How you know it worked:** *Window ▸ Package Manager* lists **LLM for Unity**.
 
 If Unity was already open, it may take one recompile before this plugin notices. You do not
-need to restart — `Tools ▸ Offline AI NPC ▸ Re-check LLMUnity installation` forces the
+need to restart — `Tools ▸ Offline AI NPC ▸ Advanced ▸ Re-check LLMUnity installation` forces the
 check.
 
 ---
 
-## 4. Install whisper.unity — optional
+<a id="5-import-offline-ai-npc"></a>
+## 4. Import Offline AI NPC
 
-This is speech **input**: the player speaking instead of typing. Skip it and everything
-else works; typed input is not a lesser path.
-
-*Window ▸ Package Manager ▸ **+** ▸ Add package from git URL*, and paste:
-
-```
-https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
-```
-
-**A missing dependency is never a compile error here.** Features that need one are compiled
-out. If you skip this, the push-to-talk code simply is not there.
+Import the package. In **Welcome**, choose **Set up first dialogue**.
+You can reopen Welcome with `Tools ▸ Offline AI NPC ▸ Welcome`, or go directly to
+`Tools ▸ Offline AI NPC ▸ Set up first dialogue`.
 
 ---
 
-## 5. Import Offline AI NPC
+<a id="6-download-a-model"></a>
+## 5. Set up the first text dialogue
 
-Import the package.
+<a id="first-text-dialogue"></a>
+<a id="5-download-one-language-model"></a>
 
-On the first editor load afterwards a **Welcome** window opens by itself, with three cards
-in the order the questions come up: are the dependencies installed, is there a model, is
-there a scene to start from.
+1. In **First dialogue**, if **Hello NPC in the scene** is empty, click **Open Hello NPC sample**. Otherwise keep or select the character you want to configure.
+2. Click **Choose this model**. If its file is missing, Model Manager opens for that model. Download it there, then click **Return to first dialogue**.
+3. Click **Preview changes**, read the proposed assignment, then **Apply to this Hello NPC**. You can restore the previous assignment with Unity **Undo**.
+4. Save the scene, press Play and wait for startup. Type a question, press Enter and read the answer in the subtitle.
 
-* It appears **once** and never again — not after a recompile, not in your next project.
-* It changes nothing on its own. Everything it can do is behind a button you press.
-* Want it back? `Tools ▸ Offline AI NPC ▸ Welcome`.
+![First dialogue with the changes previewed](images/first-dialogue.png)
 
----
+**Already have a GGUF?** Expand **Use an existing local file** and select it. To import a file, click **Open Model Manager**; see [the own-GGUF steps](GettingStarted.md#own-gguf-with-hello-npc).
 
-## 6. Download a model
+**Choose another catalog option** lets you filter the model catalog by language and configuration size. The character's dialogue language is set in its persona settings; see [Languages](Languages.md).
 
-`Tools ▸ Offline AI NPC ▸ Model Manager`.
-
-Every row tells you its **tier**, its **languages** and its **licence** before you download
-anything. The default line-up is chosen so that nothing you ship needs an attribution.
-
-Pick the one that matches your language and your hardware tier, and download it.
-
-Things worth knowing:
-
-* The manager verifies the finished file against a hash. A half-finished download is caught
-  **here**, not three hours later as inexplicable behaviour.
-* `[Ready]` means the file is on disk *and* its header parses. `[Manual]` means you supplied
-  it yourself, so the manager can only tell you what the file itself says.
-* **Download one.** They are gigabytes each, and it is very easy to end up with six.
+Start with text. **Optional speech setup** and the later voice/microphone sections can wait until this works. For distribution, check [Licensing](Licensing.md); advanced tier startup is in [Hardware tiers](HardwareTiers.md).
 
 ---
 
-## 7. Add a voice
+<a id="8-check-the-setup-before-you-build-anything-on-it"></a>
+## 6. Check the text setup
 
-Speech **output**. The plugin ships the integration; the engine is yours to install.
+If the model does not start, open `Tools ▸ Offline AI NPC ▸ Check my setup` with Hello NPC open. Resolve the LLM dependency, selected model and scene-reference items for text dialogue.
 
-1. Download a [Piper](https://github.com/rhasspy/piper) release and unpack it into
-   `Assets/StreamingAssets/piper/`, so that `piper.exe` is directly inside that folder.
-2. Add at least one voice to `Assets/StreamingAssets/piper/voices/` — **both files**:
-   `name.onnx` **and** `name.onnx.json`.
-
-> ### The most common setup failure in this whole package
-> A voice with the `.onnx` but not the matching `.onnx.json`.
-> The result is **silence, with no error message at all**. If your character never speaks
-> and the console is clean, check this before anything else.
-
-Japanese needs an engine you supply — VOICEVOX is the usual choice, and connecting it is
-about eighty lines against one interface. Worked example in
-[Languages](Languages.md#bring-your-own-engine).
+Voice, codec and speech-output items belong to optional audio. See [Getting started](GettingStarted.md) for more detailed setup help.
 
 ---
 
-## 8. Check the setup before you build anything on it
+<a id="9-your-first-conversation"></a>
+## 7. Your first typed conversation
 
-`Tools ▸ Offline AI NPC ▸ Check my setup`.
+If it is not already open, click **Open Hello NPC sample** in Welcome and save the current
+scene if prompted. It opens the already-wired `Samples/HelloNpc/HelloNpc.unity`. Press Play
+and wait for startup to finish. Type a question into the text box, press Enter and read the
+answer in the subtitle. If the model is unavailable or another turn is busy, the question
+stays in the input field; submit it again after resolving the message. It is not queued
+automatically. No microphone or ready speech engine is required for this first typed turn.
+A voice warning points to optional audio setup.
 
-Every line is a real check against your project, and a failure tells you what to do rather
-than what went wrong.
-
-**Fix everything red now.** Each red item is something that would otherwise reappear later
-as behaviour you will not connect to its cause.
-
----
-
-## 9. Your first conversation
-
-Open the `Samples/HelloNpc` sample — the smallest one that talks. Press Play, type
-something, hear an answer.
-
-A healthy start prints these lines. Learn to recognise them:
+A healthy default tier start prints these lines. Learn to recognise them:
 
 ```
 [OfflineAINPC] Hardware: NVIDIA GeForce RTX 3060 Laptop GPU (5996 MB VRAM, discrete), ...
 [OfflineAINPC] Tier resolved: Standard — 3996 MB VRAM free after a 2000 MB game reserve
-[OfflineAINPC] [TTSEngineManager] Active: PiperEngine (en)
 [OfflineAINPC] Running qwen3-4b-q4km at tier Standard with 36 GPU layers
 [OfflineAINPC] Startup verdict: tier Standard — ...; model qwen3-4b-q4km, 36 GPU layers
 ```
 
-**The startup verdict line is the one that matters.** It means the whole chain resolved. If
-it never appears, your problem is upstream of dialogue and
-[Troubleshooting](Troubleshooting.md) is the next page to read.
+**For the tier route, the startup verdict summarizes the selected tier and model.** It does not prove voice
+readiness or replace asking the first typed question. If text never arrives, inspect
+the Console and LLM/model setup rows, then [Troubleshooting](Troubleshooting.md).
+The own-GGUF route disables its linked TierBootstrap; use the assigned LLM's startup
+diagnostics rather than expecting a tier verdict.
 
-**The first reply of a session is slower than the rest.** The prompt cache is filling. That
-is expected, it is measured, and it does not mean anything is wrong.
+For Qwen3-TTS's ordinary DLL route, look for `Native CPU ready` in the Console; Piper
+has its own engine diagnostics. An explicitly configured external server has separate
+readiness diagnostics. Neither speech engine is required for text dialogue.
+
+**Startup and the first reply can take longer than later turns**, including while a
+prompt cache is being filled. This is a possible cause of delay, not a guarantee that an
+unresponsive scene is healthy. Check the startup verdict for tier startup, or the assigned
+LLM startup for the own-GGUF route, plus the Console and setup report.
 
 ### Normal, or broken?
 
-The first hour with a local model is mostly learning which surprises are the technology and
-which are a mistake. These are the technology:
+These behaviours can be expected in the stated conditions. Use the setup report and
+Console to distinguish them from a failed or still-running startup:
 
 | What you see | |
 |---|---|
-| The first reply takes several seconds, the rest do not | **normal** — prompt cache |
+| Subtitle appears, no sound, and no voice configured | **normal** on the text-only path; add audio afterwards if wanted |
+| The first reply is slower than later turns | prompt-cache setup can contribute; check startup diagnostics if no answer arrives |
 | The same question gets a different answer each time | **normal** — it is a model, not a dialogue tree |
-| She will not repeat an authored line word for word | **normal** — author those lines yourself and use the model between them |
-| She forgets the conversation after you stop playing | **normal** until you give memory a store |
-| She forgets what you said ten minutes ago | **normal** — the window is the last ~20 turns per character |
-| Her mouth does not move, she does not walk anywhere | **normal** — the plugin drives none of that |
-| She says something about the room that is not there | **normal** without perception; the cure is [Perception](Perception.md), not a sterner prompt |
-| The editor sits still for seconds on the first Play | **normal** — the model is loading, once |
-| One turn in ten is noticeably slower than the others | **normal** — see [Limitations](Limitations.md#latency) for the distribution |
+| The character will not repeat an authored line word for word | **normal** — author those lines yourself and use the model between them |
+| `NPCMemory` has no replay | **normal** until you assign `NPCMemory.Store`; the agent's chat history is separate |
+| A configured `NPCMemory` replay drops old turns | **normal** — its window is the last ~20 turns per character |
+| The mouth does not move, the character does not walk anywhere | **normal** — the plugin drives none of that |
+| The character invents something in the room | wire [Perception](Perception.md) to supply nearby context; this does not guarantee factual free-form prose |
+| The editor seems unresponsive on the first Play | loading may be involved; inspect the Console and model startup instead of assuming every stall is normal |
+| Some turns are much slower than others | First and later turns can differ. See [Limitations](Limitations.md#latency) for causes of delay and checks. |
 
 And these are not — each has a page that names the cause:
 
 | What you see | |
 |---|---|
-| Subtitle appears, no sound | **broken** — usually a voice missing its `.json` partner ([Troubleshooting](Troubleshooting.md)) |
-| She answers in the wrong language | **broken** — voice switched, prompt not |
+| Audio enabled, subtitle appears, no sound | **broken speech setup** — check the engine and paired voice files ([Troubleshooting](Troubleshooting.md)) |
+| The character answers in the wrong language | Check the language directive and the selected model. |
 | Replies run on for paragraphs | **broken configuration** — the token ceiling and sentence limit, not the wording of the prompt |
-| The startup verdict line never prints | **broken** — the chain did not resolve; nothing downstream will work |
-| Push-to-talk sends things you never said | **broken** — the utterance gate is not in the path |
+| No text answer and no startup verdict | check the LLM dependency, model and references before adding speech |
+| Push-to-talk sends things you never said | Check the microphone, recognition language and model, and the utterance-gate settings. The gate filters known cases; it cannot prevent every transcription error. |
+
+---
+
+<a id="7-add-a-voice"></a>
+## 8. Optional: add a voice
+
+The package includes the Windows x64 CPU Qwen speech library. Its target CPU must support **AVX2, BMI2, FMA, F16C and SSE4.2**. macOS and Linux libraries are not included.
+
+1. In **Tools → Offline AI NPC → Model Manager**, download the **0.6B CustomVoice Q4 talker** and **Q8 codec** under *Voices and speech models* (about 0.9 GB together).
+2. Use the scene's **Qwen3-TTS Engine** through **TTS Engine Manager** and its language binding. The sample supplies this wiring; a custom character must select that engine.
+3. Leave **External server URL** and **Style** empty. Use `serena` in **Default voice** to keep the same voice across languages. A character's `SpeechRequest` or **Speaker voices** entry can override it. Set the language separately; choosing a voice does not translate the text.
+4. In Play, type a short prompt and check the reply's subtitle and speech in the chosen language. Repeat this check in your built Windows player with the model files available.
+
+The default route loads the DLL in Unity and streams PCM to the existing speech session. It does not start `tts-server.exe`. The native profile is CPU-only with eight threads. **StopAsync** waits for native generation and worker settlement before releasing the context. Cancellation requests cooperative cancellation; it is not an instant-stop guarantee.
+
+A separately launched server and **External server URL** / `AttachTo(url)` are [optional advanced alternatives](Languages.md#external-qwen-server). Keep that server's own model, backend, version and distribution requirements separate.
+
+For a new Piper setup, put `piper.exe` for Windows and its companion files in
+`Assets/StreamingAssets/piper/`, and the `name.onnx` / `name.onnx.json` pair in
+`Assets/StreamingAssets/piper/voices/`. Other platforms remain unverified. Preserve
+existing working configurations and custom paths.
+
+Piper remains supported alongside Qwen3-TTS. Keep **both files**, `name.onnx` and
+`name.onnx.json`; an incomplete pair is refused with a diagnostic. Model Manager's
+**Import file** copies a local pair while preserving the originals and existing destination
+files. The imported pair goes into Model Manager's `ModelsRoot`; this does not install
+the engine or connect the built-in Piper driver to that voice.
+Copying and verification show inline background progress; **Cancel import** requests
+safe cleanup. See [Languages](Languages.md) and [Troubleshooting](Troubleshooting.md).
+
+Run **Check my setup** again and fix the speech rows. Ask another typed question and
+check both the subtitle and audio. File presence does not prove native engine startup.
+
+
+---
+
+<a id="4-install-whisperunity--optional"></a>
+## 9. Optional: add microphone input
+
+This is speech **input**: the player speaking instead of typing. Add it after the typed
+path works; skip it if you do not need a microphone.
+
+1. Install whisper.unity: *Window ▸ Package Manager ▸ **+** ▸ Install package from git URL*,
+   and paste:
+
+   ```
+   https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
+   ```
+
+2. In the Model Manager, open **Speech recognition** and download the Whisper model your
+   preset names — `ggml-tiny.en.bin` or `ggml-base.en.bin` for English on Light and
+   Standard, the multilingual `ggml-base.bin` or `ggml-small.bin` otherwise. An `.en` model
+   recognizes English only.
+3. Select the Hello NPC character and add two components: **Add Component ▸ Offline AI NPC
+   ▸ Push To Talk** and **Add Component ▸ Offline AI NPC ▸ Whisper Speech Recognition**.
+   For runtime English/Russian switching, download a multilingual model such as `ggml-small.bin`
+   and set **Model File Name** to it before entering Play. The loaded model stays in use for the
+   session; a Language Definition's **STT model id** does not replace it.
+4. Press Play, click outside the text box, hold **V**, speak and release. What it heard goes
+   to the character as if typed; the screen says when a press was not sent, and why.
+
+**A missing dependency is never a compile error here.** Without whisper.unity the Whisper
+Speech Recognition component is compiled out; Push To Talk stays, and with no recognizer
+beside it every press is reported as not sent. Your own recognizer can implement
+`ISttEngine` instead. Details: [Getting started](GettingStarted.md#6-speech-recognition).
 
 ---
 
@@ -205,17 +261,17 @@ section exists so that you know what is already there before you build it yourse
 | Area | What it is for | The problem it solves |
 |---|---|---|
 | **Core** | languages, presets, sampling, the streaming reply parser, logging | A model answering in the wrong language, or a reply arriving as tokens when speech needs sentences |
-| **Speech ▸ TTS** | the engine interface, Piper driver and process pool, voice routing, the streaming speech session | Turning a reply into audio while it is still being generated, instead of after |
-| **Speech ▸ STT** | shared microphone loop, push-to-talk recorder, the utterance gate | Whisper inventing sentences out of silence — see below, it matters |
+| **Speech ▸ TTS** | the engine interface, the Qwen3-TTS engine (native DLL or an optional external HTTP URL), the Piper driver and process pool, voice routing, the streaming speech session | Turning a reply into audio while it is still being generated, instead of after |
+| **Speech ▸ STT** | Push To Talk, the recognizer interface, shared microphone loop, push-to-talk recorder, the utterance gate | Whisper inventing sentences out of silence — see below, it matters |
 | **State** | axes, bands, traits, mood presentation, serialisation | A character whose mood and relationships change, and who reads differently because of it |
 | **Actions** | the verb schema, parser, dispatcher, targets, one-shot repair | The character DOING things, not only saying them — and doing only what you allowed |
-| **Perception** | points of interest, weighted queries, snapshots, phrasing | Her knowing what is actually around her, rather than being told to pretend |
-| **Memory** | a small conversation window over storage you supply | Her remembering the last few turns without you inventing a format |
+| **Perception** | points of interest, weighted queries, snapshots, phrasing | The character knowing what is actually around, rather than being told to pretend |
+| **Memory** | a small conversation window over storage you supply | The character remembering the last few turns without you inventing a format |
 | **Hardware** | probe, tiers, the cascade, model catalog | Deciding at startup what this machine can carry, and picking a model to match |
-| **Models** | gguf reading, asset states, storage paths | Knowing a model file is whole and usable before loading it |
+| **Models** | gguf reading, asset states, storage paths | Checking file evidence before loading; native compatibility and startup remain separate |
 | **Diagnostics** | the checks behind the setup window | Finding a broken setup at edit time rather than in a playtest |
 | **Verification** | latency measurement, prompt snapshots, live checks | Proving it works, with numbers you produced yourself |
-| **Integrations** | the LLMUnity grammar binding | Constraining the model's output to your action schema |
+| **Integrations** | the LLMUnity grammar binding; Whisper Speech Recognition | Constraining the model's output to your action schema; recognizing the player's speech with whisper.unity |
 
 ### Parts worth knowing about early
 
@@ -230,7 +286,7 @@ every rejection says which one it was.
 **Action repair** (`ActionRepair`). When the model returns a malformed action, one retry is
 allowed — and it asks for **the action alone**, never the reply again. By the time anyone
 knows the action was bad the speech has already been spoken, and regenerating it would make
-her say the same thing twice.
+the character say the same thing twice.
 
 **Traits versus state** (`TraitPreset` versus `StateAxes`). Traits never move: they are why
 two characters with identical axes behave differently — the shy one starts lower and warms
@@ -244,7 +300,10 @@ that is a designer's call rather than the plugin's.
 **The language directive** (`LanguageDirective`). The plugin's own contribution to your
 system prompt: answer in THIS language, and keep it about this long. Both sentences are
 written **in the language they are asking for** — an instruction the model cannot read is
-not an instruction.
+not an instruction. Your dialogue code appends it:
+`LanguageDirective.For(LanguageRuntime.Current)` returns what the language definition
+authors, and nothing when it authors neither sentence. Hello NPC speaks the language of its
+own system prompt and does not add it.
 
 **Preset choice** (`PresetCatalog`). Your entry outranks an official one for the same slot;
 otherwise the exact tier wins, then the closest lighter tier — because running something
@@ -256,124 +315,80 @@ All under `Tools ▸ Offline AI NPC`.
 
 | Window | What it answers |
 |---|---|
-| **Welcome** | "What do I do first?" Three cards, once, on first import |
-| **Model Manager** | "Which model, and is it really here?" Tier, languages and licence per row, downloads checked by size and header (and by hash when the preset carries one), and control over what enters a build |
-| **Presets** | "Which model and which voice does this language and tier use?" |
+| **Welcome** | Start with **Set up first dialogue**; links to setup, samples and documentation. |
+| **First dialogue** | Choose one model, prepare its file, then preview and apply its assignment to Hello NPC. |
+| **Model Manager** | "Which model, and is it really here?" Tier, languages and licence for catalog rows, downloads checked by size and header (and by hash when the preset carries one), and control over what enters a build |
+| **Presets** | "Which model and voice are recommended for this language and tier?" This does not select the scene's active model |
 | **Check my setup** | "Is anything wrong before I press Play?" Real checks, each failure saying what to do |
-| **Prompt debugger** | "**Why did she say that?**" What the model was actually told. For a local product this is the only way to answer it |
-| **Live verification** | "Does it actually speak?" Auditions the real voice without entering play mode, and runs a whole turn — prompt, model, voice — in play mode. Static checks can say a configuration is valid, never that it works |
+| **Prompt debugger** | "**Why did the character say that?**" What the model was actually told. For a local product this is the only way to answer it |
+| **Live verification** | "Does it actually speak?" Runs a whole turn — prompt, model, voice — and plays it; it generates before it voices, so Hello NPC and most characters need Play mode, and outside it the window says why it refuses. A language is marked verified only when you answer **Yes, record it** to "was the reply spoken in this language?". Static checks can say a configuration is valid, never that it works |
+| **Agent tools (MCP)** | "Can my coding agent test this character with me?" An MCP server inside the editor, off until you switch it on: Claude Code, Cursor or Codex can read what a character was told, run a real turn, look at state, memory and perception, and mark objects to be noticed. See [Agent tools](AgentTools.md) |
+
+<a id="every-menu-item"></a>
+### Every item in the menu
+
+`Tools ▸ Offline AI NPC`, top to bottom — the windows first, everything else under **Advanced**:
+
+| Item | What it does |
+|---|---|
+| **Welcome**, **Set up first dialogue**, **Model Manager**, **Presets**, **Check my setup**, **Live verification** | the windows above, in the order you first need them |
+| **Prompt debugger**, **Agent tools (MCP)** | the windows above; **— start the server** and **— stop the server** switch MCP without opening its window |
+| **Advanced ▸ Check my setup (log to console)** | the same report as text in the Console — paste it into a support request |
+| **Advanced ▸ Live verification — verify everything (console)** | runs every character that follows the project language through each language and prints what played; a character that answers in its persona's language, such as Hello NPC, is listed as skipped — verify it in the window. It records nothing as verified and skips a language without a test line. Chosen again during a run, it offers to stop it |
+| **Advanced ▸ Validate model references** | lists references in scenes, prefabs and assets to model files that are not on disk — the same check that can stop a build |
+| **Advanced ▸ Check for unaddressable scripts** | finds a MonoBehaviour or ScriptableObject class in a file with another name: Unity lets you add such a component to a scene, and it never runs |
+| **Advanced ▸ Re-check LLMUnity installation** | looks for LLM for Unity again and sets or clears `LLMUNITY_PRESENT` |
+| **Advanced ▸ Reset to the embedded catalog** | puts the official presets back to the ones in the package; your own presets are kept |
+| **Advanced ▸ Show welcome again after the next reload** | Welcome opens by itself once more |
+| **Advanced ▸ Logging ▸ Verbose logging (AINPC_DEBUG)** | adds or removes the `AINPC_DEBUG` symbol and recompiles, so debug lines exist at all. For a log for support, turn it on and set **Minimum level ▸ Debug** below |
+| **Advanced ▸ Logging ▸ Minimum level ▸ Debug … Silent** | filters the plugin's console lines while you work, in Play mode too; a shipped game sets `Log.MinimumLevel` itself |
+| **Advanced ▸ Speak one line (Piper) ▸ …** | says one fixed sentence through Piper, with no language model and no Play mode. It needs Piper and the named voice installed; the Russian item uses the voice the Russian language definition names, so Russian has to be set up for Piper |
 
 ### What the plugin deliberately does not do
 
 Knowing these saves you looking for them:
 
-* **It saves nothing until you say so.** `NPCMemory` writes through a store you choose.
-  `PlayerPrefsStore` ships with the plugin and takes one line; a file or your own save
-  system is three methods. See [Dialogue ▸ Memory](Dialogue.md#memory). Nothing is written
-  behind your back, because your game already owns its save format.
-* **It does not move, animate or draw anything.** No subtitles, no mouth, no walking to the
-  window when she says she is going to. The plugin decides *what* the character says and
-  *what she decided to do*; every visible consequence is yours to wire — which is also why
-  it works in any render pipeline and any art style.
-* **It does not bundle the model runner.** LLM for Unity is a separate package under its own
-  licence.
-* **It does not bundle a speech engine.** Piper is yours to install and ship, and Japanese
-  needs an engine you supply.
-* **It does not touch your Project Settings, scenes or assets** unless you press a button
-  that says it will.
+* **Qwen speech includes its Windows x64 CPU native DLL.** Model files are downloaded separately. Piper is still an external program you install; preserve its working executable, voice/config pair and binding.
 
 ## 11. Your own character
 
-The plugin gives you the pieces; you write the turn. Here is the shape of it, with the four
-things beginners get wrong marked.
+Start from the canonical `Samples/HelloNpc/HelloNpcCharacter.cs` after the sample answers.
+It contains the real LLMUnity call, the check that refuses a turn while another runs,
+action handling and cleanup. Preserve
+its public `Say(string)` entry point and serialized references when adapting an existing scene.
 
-```csharp
-using System;
-using System.Collections;
-using UnityEngine;
-using OfflineAINPC.Core;
-using OfflineAINPC.Speech;
+The following is a teaching outline, not a copyable controller or a model backend:
 
-public sealed class TalkingCharacter : MonoBehaviour
-{
-    [SerializeField] private AudioSource _voice;
-    [SerializeField] private int _speakerId;      // which voice, when the engine has several
-
-    private StreamingReplyParser _parser;
-    private StreamingSpeechSession _speech;
-    private bool _busy;
-
-    public IEnumerator Say(string playerLine)
-    {
-        // (1) ONE lock, released on EVERY exit path.
-        if (_busy) yield break;
-        _busy = true;
-
-        try
-        {
-            _parser = new StreamingReplyParser();
-            _speech = new StreamingSpeechSession(
-                // (2) a Func, not a stored reference: the engine is replaced when the
-                //     language changes, and during that switch it is null.
-                engine:    () => TTSEngineManager.Instance != null ? TTSEngineManager.Instance.Active : null,
-                audio:     _voice,
-                speakerId: _speakerId,
-                onSubtitle: (text, seconds) => ShowSubtitle(text, seconds),
-                onWarning:  message => Debug.LogWarning(message));
-
-            StartCoroutine(_speech.RunSynthesis());
-            StartCoroutine(_speech.RunPlayback());
-
-            yield return GenerateReply(playerLine, onToken: textSoFar =>
-            {
-                // (3) CUMULATIVE or DELTA — get this backwards and she says
-                //     "MMaraMara VMara VeyMara Vey, 34." instead of "Mara Vey, 34."
-                _parser.AppendCumulative(textSoFar);   // LLMUnity streams cumulative text
-                // _parser.Append(delta);              // a backend streaming true deltas
-                while (_parser.TryDequeueUnit(out var unit)) _speech.Enqueue(unit);
-            });
-
-            _parser.Complete();
-            while (_parser.TryDequeueUnit(out var unit)) _speech.Enqueue(unit);
-
-            // (4) without this the synthesis loop waits forever for a unit that is never
-            //     coming, and she never finishes speaking.
-            _speech.InputComplete();
-
-            while (!_speech.Finished) yield return null;
-        }
-        finally
-        {
-            _busy = false;      // (1) again: this is why it is a finally
-        }
-    }
-
-    private void ShowSubtitle(string text, float seconds) { /* your UI */ }
-
-    private IEnumerator GenerateReply(string playerLine, Action<string> onToken)
-    {
-        // LLMUnity, your own binding, or a stub. The plugin does not care which.
-        yield break;
-    }
-}
+```text
+typed question -> one admitted turn -> streamed LLM reply
+              -> local parser -> local speech session -> subtitle (+ optional audio)
+completion    -> complete parser -> InputComplete -> dispose session
+disable       -> invalidate callbacks -> cancel generation -> dispose session
 ```
 
-### The four, spelled out
+For guarded wiring in C#, read [Dialogue](Dialogue.md#the-whole-controller). Its
+`GenerateReply`, `CancelGeneration` and `ShowSubtitle` methods are explicit placeholders
+for your existing backend and UI; the empty `GenerateReply` does not call a language model.
+Use Hello NPC for a runnable starting point rather than filling these seams on day one.
 
-1. **`_busy` released in a `finally`.** Every early return, every exception, every cancelled
-   coroutine must clear it. The symptom when it leaks is brutal: the character stops
-   answering **forever**, and the console says nothing.
-2. **A null engine is normal.** It is a `Func<>` because the engine is swapped when the
-   language changes. The session copes by delivering the line to the subtitle only.
-3. **Cumulative versus delta.** LLMUnity's stream callback hands you the *whole reply so
-   far* every time. Feed that to `AppendCumulative`. A backend that streams true deltas
-   needs `Append`. The failure is silent and unmistakable once you have heard it.
-4. **`InputComplete()`.** Tells synthesis no more text is coming.
+<a id="the-four-spelled-out"></a>
+### The four checks to preserve
 
-Full walkthrough in [Dialogue](Dialogue.md). Memory, moods and relationships are in
-[State](State.md), which opens with a ten-line version.
+1. **A turn owns its callbacks and `_busy`.** Keep parser and speech references local to
+   that turn and reject callbacks after disable or replacement. Release the lock only
+   while that turn is current. `OnDisable` must cancel the backend and dispose speech
+   explicitly: Unity can stop coroutines without running `finally`.
+2. **A null or unready engine is normal for text dialogue.** Fetch the current engine through
+   a `Func<>`; speech is optional and the session can deliver subtitles without audio.
+   Diagnose a failed voice setup before testing speech.
+3. **Cumulative versus delta.** LLMUnity's callback carries the whole reply so far; use
+   `AppendCumulative`. A backend streaming true deltas needs `Append`.
+4. **Completion and cleanup.** Complete the parser and call `InputComplete()` when generation
+   ends. Dispose the session on failure or disable, and prevent an old continuation from
+   clearing a newer turn's state.
 
----
+Memory storage is explained in [Dialogue](Dialogue.md#memory); moods and relationships
+are in [State](State.md), which opens with a ten-line version.
 
 ---
 
@@ -389,9 +404,11 @@ listed; the rest are internals that happen to be public.
 |---|---|
 | `NpcStateComponent` | holds one character's axes, traits and mood |
 | `AIPointOfInterest` | marks a thing in the world as noticeable, with an id and a description |
-| `PerceptionQuery` | the character's own view: what she can see, ranked |
-| `ActionDispatcher` | receives the actions she decides on and routes them to handlers |
-| `PersistentMicRecorder` | push-to-talk recording for one listener |
+| `PerceptionQuery` | the character's own view: what it can see, ranked |
+| `ActionDispatcher` | receives the actions the character decides on and routes them to handlers |
+| `PushToTalk` | hold a key, speak, release: the recognized line goes to the character |
+| `WhisperSpeechRecognition` | recognizes a recording with whisper.unity and the downloaded Whisper model |
+| `PersistentMicRecorder` | push-to-talk recording for one listener; Push To Talk adds its own |
 | `TTSEngineManager` | owns the active speech engine and switches it with the language |
 
 ### Implement in your own code
@@ -402,6 +419,7 @@ listed; the rest are internals that happen to be public.
 | `IActionTarget`, `IAimTarget` | be something an action can be aimed at |
 | `IStateStore`, `IKeyValueStore` | persist state and memory in YOUR save system |
 | `ITTSEngine`, `ILanguageAwareEngine` | add a speech engine the package does not ship |
+| `ISttEngine` | use a speech recognizer other than Whisper with Push To Talk |
 | `ILlmHost` | put a different model runner underneath |
 | `ILiveVerifiable` | let the live-verification window exercise your character |
 
@@ -419,7 +437,7 @@ listed; the rest are internals that happen to be public.
 | `LanguageRuntime` | the current language, and the directive it contributes |
 | `StateSerializer` | the persisted half of a character |
 | `SetupChecks` | run the same checks the window runs, from your own code |
-| `LatencyMeasurement` | produce your own numbers rather than trusting ours |
+| `LatencyMeasurement` | produce your own numbers rather than trusting ours. Let `Run` finish or call `Dispose` on its enumerator: a coroutine stopped with `StopCoroutine` or by disabling its object keeps the character's conversation set aside, and the character refuses other turns |
 | `ActionParser` | turn the model's text into an action, or say precisely why it could not |
 | `PerceptionSnapshot` | the ranked result of one query, reused for the prompt and the shortlist |
 | `PoiRegistry` | every noticeable thing currently registered |
@@ -427,7 +445,7 @@ listed; the rest are internals that happen to be public.
 | `HardwareProbe`, `TierCascade` | what this machine is, and what that means for the model |
 | `ModelCatalog` | the recommended line-up, per tier |
 | `AiNpcDiagnostics`, `DiagnosticsReport` | the checks and their result, as data |
-| `LLMUnityGrammarBinding` | hand your action grammar to LLMUnity so the model cannot leave it |
+| `LLMUnityGrammarBinding` | apply your action grammar to LLMUnity; a valid completed output must follow it while the binding is active |
 | `TextLengthRule` | how long a reply should be, as a phrase the model can read |
 
 ### Author as assets
@@ -445,7 +463,7 @@ listed; the rest are internals that happen to be public.
 | Type | Why |
 |---|---|
 | `PerceptionWeights` | how much each factor of attention counts — a field on the perception query |
-| `SamplingProfile` | temperature, penalties, reply length, per tier |
+| `SamplingProfile` | temperature, penalties, reply length; one profile for the session |
 | `PresetCatalog` | which model and voice a language and tier resolve to — the JSON the Model Manager reads |
 | `KeyValueStateStore` | a ready `IStateStore` over any key-value storage you already have |
 | `ActionTargetBehaviour` | the component that makes a GameObject nameable as a target |
@@ -466,22 +484,24 @@ models downloaded while experimenting would otherwise silently become a twenty-g
 build, discovered at upload time. Turn on the one you ship, in the Model Manager.
 
 **An included model is staged into `Assets/StreamingAssets/OfflineAINPC` for the duration of
-the build and removed afterwards.** That is the only way to get a file into a Unity build,
-and it is why the plugin does not leave models sitting in `StreamingAssets` the rest of the
-time.
+the build and removed afterwards.** This is the plugin's staging path for selected model
+files; it avoids leaving those copies in `StreamingAssets` between builds. For the
+own-GGUF route, configure the player model path separately: including the file does not
+rewrite `LLM._model`. See [the path requirements](GettingStarted.md#own-gguf-with-hello-npc).
 
-**A build with broken model references is refused before it starts** rather than produced
-dead and discovered by a player.
+When **Block a build whose scenes reference a model file that is not on disk** is enabled
+in Model Manager (`BlockBuildOnBrokenReferences`), detected missing model references
+stop the build; disabling it reports a warning. The validator matches file names in its
+search roots. It does not verify player paths, model compatibility or portability.
 
-**Piper is yours to ship.** It and its voices are external files, not Unity assets, and they
-must be where the built player expects them. A build that works in the editor and is silent
-as a player is nearly always this.
+* **Qwen speech includes its Windows x64 CPU native DLL.** Model files are downloaded separately. Piper is still an external program you install; preserve its working executable, voice/config pair and binding.
 
 ### Before you send it to anyone
 
 * run it on a machine that is **not** your dev machine, ideally without Unity installed;
-* find the **startup verdict** line in the player log;
-* ask one question, hear one answer.
+* find the **startup verdict** for tier startup, or check the assigned LLM startup and
+  model path for the own-GGUF route, in the player log;
+* type one question and read one answer; if you enabled audio or microphone input, test those separately.
 
 ---
 
@@ -491,12 +511,13 @@ In the order these actually happen:
 
 | Symptom | Check first |
 |---|---|
-| Never speaks, console clean | the voice's `.onnx.json` — missing one is silent |
-| No startup verdict line | the model file: present, whole, referenced |
+| Audio enabled, but no sound | For the included Qwen route, check the native library, supported CPU and talker/codec model files. Read the engine's LastProblem/Console diagnostic. A successful file scan does not prove native generation or sound. For an explicitly configured HTTP URL, check that server and its model separately. |
+| No startup verdict line in the tier route | the model file: present, whole, referenced; the own-GGUF route uses the assigned LLM startup diagnostics |
 | Compiles, but no dialogue features | LLM for Unity missing, or Unity has not recompiled since it appeared |
-| Push-to-talk does nothing | whisper.unity not installed. Typing still works |
-| Works in editor, silent in build | Piper not beside the player, or the path is wrong |
-| She says "MMaraMara VMara Vey…" | cumulative fed to `Append`, or deltas to `AppendCumulative` |
+| Holding V does nothing | Push To Talk is not on the character, or the text box has keyboard focus — click outside it. Typing still works |
+| "Not sent: …" after speaking | the reason follows: no recognizer (whisper.unity or Whisper Speech Recognition missing), model not downloaded, too short, too quiet |
+| Works in editor, silent in build | For the included Qwen route, check the native library, supported CPU and talker/codec model files. Read the engine's LastProblem/Console diagnostic. A successful file scan does not prove native generation or sound. For an explicitly configured HTTP URL, check that server and its model separately. |
+| The character says "MMaraMara VMara Vey…" | cumulative fed to `Append`, or deltas to `AppendCumulative` |
 | Stopped answering, nothing in console | a leaked `_busy` — check every exit path |
 | Everything is very slow | which tier resolved? The Light tier on a CPU is slow by design; below it there is no model |
 
@@ -508,23 +529,23 @@ In the order these actually happen:
 
 | | |
 |---|---|
-| **Model / gguf** | the language model file. Bigger is smarter and slower |
+| **Model / gguf** | the language model file. Size alone does not establish answer quality or speed |
 | **Tier** | what your hardware can carry. Decided at startup and printed |
-| **Piper / VOICEVOX** | the programs that turn text into audio |
+| **Qwen DLL / Piper** | Model Manager downloads the speech model files. The package includes a **Windows x64 CPU Qwen native DLL**; leave **External server URL** empty to use it. The ordinary Qwen route needs no manually started HTTP server, executable or compiler setup. Keep an existing working Piper route. See [the native speech setup](Languages.md#bundled-qwen-native) and [Licensing](Licensing.md). |
 | **Whisper** | the program that turns the player's speech into text |
 | **StreamingAssets** | the Unity folder whose contents survive into a build as real files |
-| **Prompt cache** | why the first reply is slow and the rest are not |
-| **Quantisation** (`Q4_K_M`) | how heavily the model was compressed to fit in memory. Smaller file, slightly worse answers. `Q4_K_M` is the usual balance |
-| **Parameters** (`4B`) | the model's size in billions of weights. 4B is the sweet spot for a game; 7B needs a bigger card |
-| **GPU layers** (`ngl 36`) | how much of the model sits on the graphics card. All of it is fastest; the rest runs on the CPU |
+| **Prompt cache** | reuses prompt processing; filling it can make an initial turn slower |
+| **Quantisation** (`Q4_K_M`) | the weight compression format. `Q4_K_M` is one option; answer quality and total runtime memory depend on the model, context and backend |
+| **Parameters** (`4B`) | the number of learned weights in billions. 4B is a model size, not a guarantee of suitability; choose by your game, language and resource budget |
+| **GPU layers** (`ngl 36`) | how many model layers are offloaded to the GPU. Useful settings depend on backend support, available memory and the game sharing that GPU |
 | **Context window** | how much text the model can hold at once — system prompt, memory replay and the current turn together |
-| **System prompt** | the standing instructions the character never says out loud: who she is, what language to answer in, what she can see |
-| **Token** | a piece of a word. Models are billed and limited in these, not in characters |
+| **System prompt** | the standing instructions the character never says out loud: who the character is, what language to answer in, what it can see |
+| **Token** | a tokenizer unit used for context and generation limits; it may be part of a word. Local use of this plugin has no per-token fee |
 | **Streaming** | the reply arriving piece by piece, so speech can start before the sentence is finished |
 | **Verb / action** | a decision the character can make, in a form your code can execute. You invent them — see [Actions](Actions.md#what-a-verb-is) |
-| **Grammar** | the rule that makes an action structurally impossible to malform, because invalid words are removed from the model's choices |
+| **Grammar** | restricts valid completed output while applied, including action fields; it does not guarantee the truth of free-form prose or a reply after cancellation/error |
 | **Axis / band** | a number describing a character (`trust: 7`) and the named range it falls in (`warm`). The model is told the band, never the number |
-| **Point of interest** | an object marked as noticeable, so she can mention what is actually there instead of inventing a fireplace |
-| **Speaker id** | which voice inside an engine to use. One Piper voice per process; VOICEVOX numbers its characters |
+| **Point of interest** | an object marked as noticeable, so the character can mention what is actually there instead of inventing a fireplace |
+| **Speaker id** | which voice inside an engine to use. Qwen3-TTS maps it to a speaker name through the engine's *Speaker voices* table; Piper runs one voice per process |
 | **Utterance gate** | the check that drops a silent or hallucinated recording before it costs a turn |
 | **Push-to-talk** | holding a key to record. The alternative — always listening — transcribes the room |

@@ -1,137 +1,53 @@
 # Licensing
 
-What you may ship, and what shipping it obliges. Read this before release, not after.
+Offline AI NPC's own code uses the Asset Store licence. The language model, speech models, engines and native libraries have their own licences. Keep the licence texts and required notices for the exact files you include in your game.
 
-**None of it applies to the plugin itself** — `Assets/OfflineAINPC/` is proprietary and yours
-to use under the Asset Store licence. Everything below is about the things the plugin *talks
-to*, which you install and may choose to redistribute.
+### The included Qwen DLL
 
----
+The package delivers `Plugins/Windows/x86_64/OfflineAINPCQwenNative.dll`, identified by [its delivery manifest](../Plugins/Windows/x86_64/native-build-manifest.json). Its qwentts.cpp and ggml source is **MIT**. The static MinGW-w64 runtime includes its own copyright/licence notices, including winpthreads. The GCC runtime is **GPLv3 with GCC Runtime Library Exception 3.1**; it is not simply MIT and is distinct from Piper's eSpeak GPL distribution.
 
-## The one that can bite: espeak-ng
+Preserve the exact five files under `Plugins/Windows/x86_64/Notices/`: `qwentts-LICENSE.txt`, `ggml-LICENSE.txt`, `MinGW-w64-runtime.txt`, `GPL-3.0.txt` and `GCC-RUNTIME-EXCEPTION.txt`. Exception 3.1 permits a qualifying Target Code combination with Independent Modules under its stated conditions; retain its full text with the GPLv3 notice. A different compiler, modified build or additional GPU library needs the terms for that exact distribution. The model weights remain a separate **Apache-2.0** download; the DLL does not bundle the talker or codec.
 
-Piper's phonemiser links **espeak-ng, which is GPL-3.0**. Piper's own MIT licence does not
-change that: a binary distribution of `piper.exe` carries espeak-ng's terms with it.
+## Qwen text and ready voices
 
-**The plugin is not affected.** It starts Piper as a separate process and talks to it over a
-pipe; it does not link, load or contain any espeak-ng or Piper code, and nothing under
-`Assets/OfflineAINPC/` is a copy of either. A build check fails if that ever changes.
+The catalogued Qwen3 text GGUF models and Qwen3-TTS CustomVoice talker/codec weights are published under **Apache-2.0**, which allows commercial use under its conditions. Include the full licence, copyright notices and any applicable NOTICE; document modifications when required. A Model Manager licence label does not replace those files. See [Apache-2.0 section 4](https://www.apache.org/licenses/LICENSE-2.0).
 
-**Your game may be affected**, if you ship Piper inside your build. That is allowed and
-normal. It obliges three things:
+The qwentts.cpp engine and ggml CPU source use **MIT**. Preserve their copyright and licence notices. Other native dependencies keep their own terms. GPU/vendor runtime libraries require the terms for that particular build; choosing Qwen weights does not license every library in a distribution.
 
-1. **Ship the licence text**, naming espeak-ng as the component it covers.
-2. **Offer the corresponding source** — a URL to the exact upstream release you shipped, kept
-   available for the period the licence requires. Pin a release tag; "latest master" is not
-   corresponding source.
-3. **Add no further restrictions.** Your EULA must not forbid, for that component, what the
-   GPL permits.
+In 1.1, Qwen speech uses named, ready **CustomVoice** speakers. Creating a voice from a description (VoiceDesign) is planned for the next version. See [Qwen speech](QwenUsage.md) for the model-mode boundary.
 
-**Your own game stays proprietary.** Launching a process does not make your code a derivative
-work any more than calling a compiler does.
+## Whisper and text-model integration
 
-**The escape hatch:** do not ship Piper. Point the plugin at VOICEVOX, at a system voice, or
-at your own engine, and let players who want Piper install it themselves. Nothing in the
-plugin requires it.
+Original Whisper tiny/base/small weights and whisper.unity source use **MIT**. LLMUnity's text compatibility sources use **Apache-2.0**. Preserve their licences and the third-party notices supplied with their exact native libraries. Install a compatible integration as a whole rather than mixing unrelated native builds.
 
----
+## Piper and individual voices
 
-## Voice models — provenance, not just the licence line
+The supported archived rhasspy Piper source uses **MIT**; its phonemizer uses **GPL-3.0 espeak-ng**. The plugin communicates with Piper through a separate process. If you distribute GPL-covered components, retain their GPL licence and notices and provide the exact Corresponding Source through a GPL-compliant distribution method. Process separation does not remove these distribution obligations.
 
-**A voice's dataset licence is not the whole answer. Read its Training line too.**
+Each Piper voice has its own model and dataset terms. Choose a voice with terms suitable for your game and keep any required attribution. A compatible voice file or an engine's MIT licence does not grant rights to every voice. The package's [voice records](../LICENSES/VOICE_LICENCES.md) identify the checked files; for GPL components see [the eSpeak boundary](../LICENSES/ESPEAK_BOUNDARY.md). These requirements do not mean that all Piper use is non-commercial.
 
-Most Piper voices are fine-tuned from the `lessac` voice, and the lessac dataset licence
-(Blizzard 2013, CSTR Edinburgh) excludes commercial speech-synthesis products from its
-permitted "Research Purposes". A permissive dataset does not clear that: the licence covers
-the recordings the voice was fine-tuned ON, not the voice it was fine-tuned FROM.
+## Files to keep with your game
 
-### The distinction, in one pair of examples
+Keep the applicable LICENSE, NOTICE, copyright/attribution records, modification notices and any required source offer or source distribution. Check engines, native dependencies and voices as separate components. [Third-party notices](../LICENSES/THIRD_PARTY_NOTICES.md) link the component and source records. Detailed development provenance remains in [the source inventory](../LICENSES/STACK_SOURCE_INVENTORY_2026-10-02.md).
 
-These two are the same corpus under the same licence, and only one is usable:
+Configured local engines process dialogue on the player's computer. Explicit downloads contact their configured hosts; a remote speech URL sends the requested text to that endpoint. The plugin has no publisher telemetry.
 
-| Voice | Dataset | Licence | **Training line** | Verdict |
-|---|---|---|---|---|
-| `en_US-libritts-high` | LibriTTS train-clean-360 | CC BY 4.0 | **"Trained from scratch on train-clean-360"** | usable |
-| `en_US-libritts_r-medium` | LibriTTS-R | CC BY 4.0 | **"Fine-tuned from English lessac medium"** | tainted |
-
-Identical dataset name, identical licence, opposite answers. **The Training line decides.**
-Apply that test to any voice you are evaluating.
-
-### What this package ships with
-
-| Voice | Licence | Provenance | Where |
-|---|---|---|---|
-| `en_US-ljspeech-medium` | **public domain** (LJ Speech) | "Trained from scratch for 1000 epochs" | en standard, en light |
-| `en_US-ljspeech-high` | **public domain** | same, higher quality | en premium |
-
-**The default line-up owes no attribution at all**, which is deliberate — a requirement
-nobody notices is how a game ships in breach of a licence it meant to honour.
-
-### If you want many distinct voices
-
-`en_US-libritts-high` carries **904 speakers** selected by id, trained from scratch on
-LibriTTS, **CC BY 4.0**. It is not in the default presets because CC BY requires attribution
-and the defaults are deliberately obligation-free. Use it deliberately, and display:
-
-> Speech synthesis by Piper (MIT). Multi-speaker English voice "libritts" trained from
-> scratch on LibriTTS train-clean-360 by Heiga Zen et al., licensed CC BY 4.0
-> (https://creativecommons.org/licenses/by/4.0/).
-
-Audition speakers with `Tools ▸ Offline AI NPC ▸ Speak one line ▸ Audition a LibriTTS
-speaker...`.
-
-### Every other language
-
-The slots are empty, and the reason is precise: **no voice with a traceable commercial
-provenance was found** — the available Piper voices for those languages are fine-tuned from
-the research-only base. That is a supply problem, not a plugin limitation. Supply your own
-voice or commission one; see [Languages](Languages.md#adding-a-language-start-to-finish).
-
-Dated copies of every card read, with the full reasoning:
-[`LICENSES/VOICE_LICENCES.md`](../LICENSES/VOICE_LICENCES.md).
-
-**VOICEVOX character voices** carry per-character terms that bind the **end user**, not you.
-Surface those terms rather than absorb them — a link in your credits, not a line in your EULA.
-
----
-
-## Does espeak-ng's GPL reach the audio it produces?
-
-No, and this is worth stating plainly because buyers ask.
-
-The FSF's position is that a program's **output is not covered by the copyright on the
-program's code**. Synthesised speech is output; it is not a derivative work of espeak-ng, and
-you owe nothing on the audio your game plays.
-
-What the GPL does reach is **distribution of the binary**. That is the boundary this plugin
-is built around, and running Piper as a separate process — which it already does — is the
-recognised way to keep copyleft away from your own code. The obligations in the section above
-apply to shipping `espeak-ng.dll`, never to the wav files it helped make.
-
----
-
-## Model weights
-
-The default catalog is **Apache-2.0** (the Qwen3 family), chosen because it is the cleanest
-licence to redistribute under and needs no visible attribution.
-
-Some other families do require attribution — Llama's "Built with Llama" is the usual one. The
-manifest has a field for it and the inspector surfaces it as a finding, because a required
-attribution nobody notices is how a game ships in breach of a licence it fully intended to
-honour. **A line in your documentation does not satisfy it; it has to be visible in the
-product.**
-
-Weights are never bundled with this package. It describes a download; it is not one.
-
----
-
-## What the plugin itself contains
-
-No DRM, no licence check, no phone-home, no registration, no time limit, no watermark, and
-**no telemetry of any kind — not even anonymous**. "No data ever leaves the machine" is the
-product's core promise, and a usage counter would make it a lie.
-
-One practical consequence, stated plainly: nothing reports back, so nobody can tell how the
-plugin is being used. That is the intended trade.
-
-Full third-party inventory: `LICENSES/THIRD_PARTY_NOTICES.md`.
+<a id="choosing-models-and-engines"></a>
+<a id="current-configuration-and-release-choices"></a>
+<a id="does-espeak-ngs-gpl-reach-the-audio-it-produces"></a>
+<a id="if-you-want-many-distinct-voices"></a>
+<a id="languages-qwen3-tts-does-not-speak"></a>
+<a id="licensing"></a>
+<a id="local-processing-and-downloads"></a>
+<a id="model-weights"></a>
+<a id="other-engines-and-model-families"></a>
+<a id="piper-and-espeak-ng"></a>
+<a id="piper-voice-models--provenance-not-just-the-licence-line"></a>
+<a id="piper-voices-and-generated-audio"></a>
+<a id="qwen3-language-and-speech-models"></a>
+<a id="qwen3-tts-in-the-development-presets"></a>
+<a id="the-distinction-in-one-pair-of-examples"></a>
+<a id="the-one-that-can-bite-espeak-ng-piper-only"></a>
+<a id="what-the-plugin-itself-contains"></a>
+<a id="what-this-package-configures"></a>
+<a id="whisper-recognition-models"></a>

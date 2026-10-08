@@ -1,71 +1,106 @@
 # Which languages does this support?
 
-There is no single honest number, so this page does not print one. A language needs three
-things to work — a model that speaks it, recognition that hears it, and a voice that says it
-— and they do not all cover the same set.
+Choose the character's reply language, microphone recognition language and voice language together. A text-only character needs a suitable language model; microphone input and speech output are optional.
 
-**The short version: your characters can hold a conversation in roughly a hundred languages.
-Voices are bundled for a few. For the rest, you supply a voice file, and doing that takes one
-asset and no code.**
+Built-in language definitions cover English, Spanish, Japanese, Russian and Simplified Chinese. Qwen3-TTS CustomVoice offers nine ready speakers across ten supported languages. Piper uses a separately chosen voice for each language. Pick the exact voice and check its terms; see [Licensing](Licensing.md).
 
 ---
 
-## Tier 1 — ready out of the box
+<a id="tier-1--ready-out-of-the-box"></a>
+In 1.1, choose a ready CustomVoice speaker. Creating your own voice from a description (VoiceDesign) is planned for the next version.
 
-| Language | Voice | Licence | Provenance |
-|---|---|---|---|
-| **English** | `en_US-ljspeech-medium` / `-high` | **public domain** | trained from scratch on LJ Speech |
+## Tier 1 — ten languages from one installed engine
 
-English is genuinely ready: a voice, no attribution owed, nothing to clear. If you want many
-distinct English voices, `en_US-libritts-high` carries 904 of them under CC BY 4.0 — see
-[Licensing](Licensing.md#if-you-want-many-distinct-voices) for the attribution string and the
-auditioning tool.
+Model Manager downloads the speech model files. The package includes a **Windows x64 CPU Qwen native DLL**; leave **External server URL** empty to use it. The ordinary Qwen route needs no manually started HTTP server, executable or compiler setup. Keep an existing working Piper route. See [the native speech setup](Languages.md#bundled-qwen-native) and [Licensing](Licensing.md).
 
-**Japanese** works, and **you supply the engine**. The package ships one speech engine, Piper,
-and Piper has no Japanese voice with clearable provenance. The usual answer for Japanese is
-VOICEVOX — a separate application with an HTTP server — and connecting it is about eighty lines
-against one interface. [The complete file is printed below](#the-whole-engine-copy-this-file):
-a working `ITTSEngine`, not a sketch. The samples in this package speak English through Piper;
-Japanese is the case you add.
 
-Each VOICEVOX character voice carries usage terms binding the *end user*, not you, and they are
-**per character** — see [Bring your own engine](#bring-your-own-engine) for what to check.
+| Language | Speaker (default) | Configured by the plugin |
+|---|---|---|
+| **English** | `serena` | yes |
+| **Japanese** | `serena` | yes |
+| **Spanish** | `serena` | yes |
+| **Russian** | `serena` | yes |
+| **Chinese (Simplified)** | `serena` | yes |
+| French, German, Italian, Portuguese, Korean | `serena`, or another ready speaker | add a Language Definition — the voice already works |
 
-**Spanish, Russian, Chinese and everything else are Tier 2 below** — not because the model or
-the recognition fall short, but because no voice with a traceable commercial provenance was
-found for them. Most published Piper voices are fine-tuned from a research-only base;
-[Licensing](Licensing.md#voice-models--provenance-not-just-the-licence-line) explains the test
-to apply, and it is a test you can apply yourself to any candidate.
+All nine preset speakers can speak the model's supported languages. The table below
+gives their native language as listed in the model card:
+
+| Speaker | Voice | Native language (model card) |
+|---|---|---|
+| `serena` | warm, gentle young female | Chinese |
+| `vivian` | bright young female | Chinese |
+| `ono_anna` | playful female | Japanese |
+| `sohee` | warm female | Korean |
+| `ryan` | dynamic male with rhythm | English |
+| `aiden` | sunny American male | English |
+| `uncle_fu` | seasoned male, mellow timbre | Chinese |
+| `dylan` | youthful male, Beijing dialect | Chinese (Beijing) |
+| `eric` | lively male, Chengdu dialect | Chinese (Sichuan) |
+
+Four female voices and five male. The upstream model card recommends each speaker's native
+language for best quality. Pick per character with *TTS voice id* on the language
+definition, per character in code through `SpeechRequest`, per legacy speaker id
+with the engine's *Speaker voices* table — or name none. All built-in Qwen language definitions and presets use `serena`; the engine also falls back to `serena` for every supported language. Voice precedence is request → *Speaker voices* row → engine *Default voice* → language definition → fallback. Set *Default voice* to `serena` and keep any request or speaker-row overrides consistent if a character should keep that voice when changing languages. Existing saved catalogs and explicit character choices are preserved on upgrade; changing the built-in defaults does not reset them. A *Style* on the engine, or `SpeechRequest.Style`,
+is sent as a delivery instruction ("whispering", "cheerful, quick") and honoured by the
+instruct-capable model variants — officially the separately configured 1.7B CustomVoice talker;
+the Qwen team lists no instruction control for the 0.6B.
+
+The bundled native route sends language per request to its pinned qwentts.cpp implementation. A region/script suffix is accepted; blank or unknown native codes select `auto`. An explicitly configured HTTP server may instead omit an unknown code and retain its own default. Check that server separately.
+
+**Piper is still supported**, as the second engine — the package includes its driver, and
+Piper itself is a program you install: a project that wants its public-domain
+English voice, or a Piper voice for a language Qwen3-TTS lacks, sets engine `piper` and a
+voice file on its language definition. Everything Piper-specific — the paired `.onnx.json`,
+espeak-ng's licence when you redistribute it — applies only then; see
+[Licensing](Licensing.md).
+
+<a id="bundled-qwen-native"></a>
+### Bundled Qwen native CPU
+
+The package includes the Windows x64 CPU Qwen speech library. Its target CPU must support **AVX2, BMI2, FMA, F16C and SSE4.2**. macOS and Linux libraries are not included.
+
+1. In **Tools → Offline AI NPC → Model Manager**, download the **0.6B CustomVoice Q4 talker** and **Q8 codec** under *Voices and speech models* (about 0.9 GB together).
+2. Use the scene's **Qwen3-TTS Engine** through **TTS Engine Manager** and its language binding. The sample supplies this wiring; a custom character must select that engine.
+3. Leave **External server URL** and **Style** empty. Use `serena` in **Default voice** to keep the same voice across languages. A character's `SpeechRequest` or **Speaker voices** entry can override it. Set the language separately; choosing a voice does not translate the text.
+4. In Play, type a short prompt and check the reply's subtitle and speech in the chosen language. Repeat this check in your built Windows player with the model files available.
+
+The default route loads the DLL in Unity and streams PCM to the existing speech session. It does not start `tts-server.exe`. The native profile is CPU-only with eight threads. **StopAsync** waits for native generation and worker settlement before releasing the context. Cancellation requests cooperative cancellation; it is not an instant-stop guarantee.
+
+A separately launched server and **External server URL** / `AttachTo(url)` are [optional advanced alternatives](#external-qwen-server). Keep that server's own model, backend, version and distribution requirements separate.
+
+Voice precedence stays: request → Speaker voices entry → Default voice → language definition → built-in fallback. The model reports nine ready speakers; names are checked without case sensitivity. Streaming retains the existing lead buffer and playback rules. Same-engine language changes do not load another Qwen context; requests use the selected language and speaker.
+
+The bundled native route allows only one initialized context per process and serializes synthesis
+requests; see [Concurrency](Limitations.md#concurrency).
+
+<a id="external-qwen-server"></a>
+<a id="building-tts-server"></a>
+<a id="windows-cuda-build-composition"></a>
+### Optional advanced: a server you own
+
+The bundled DLL is the normal Qwen route. Use **External server URL** or `AttachTo(url)` only when deliberately connecting a separately launched compatible HTTP server, for example an independently checked GPU setup. A nonempty URL keeps the HTTP transport; the component does not own or stop that server. A remote URL sends dialogue off the player's machine. Preserve a working local configuration unless you intend to change that boundary.
+
+The pinned source reference is qwentts.cpp `6fae92914045cd83364d2845ceaa0f7969727319`. Build and distribute your chosen server separately under its exact licences. The bundled DLL remains CPU-only and Windows x64; an external server has its own platform and GPU requirements.
 
 ---
 
 ## Tier 2 — works, bring your own voice
 
-**This is the large and interesting tier, and it is where most projects will land.**
+A language outside the ten Qwen3-TTS languages needs another voice engine or a licensed Piper voice. Check that your chosen language model and multilingual Whisper model support the language; their wider language lists do not guarantee useful accuracy in your game. Configure its prompt, recognition code and voice in a Language Definition, then add that definition to your Language Set.
 
-The language model handles well over a hundred languages and speech recognition covers
-around a hundred. What is missing for these is only a bundled voice — and pointing the plugin
-at a voice you supply is a single asset with no code.
+Test representative questions and replies in Play and in your target Player. `Tools ▸ Offline AI NPC ▸ Live verification` can run a whole turn; supply a test line when there is no built-in one. A voice check is marked verified only after you confirm what you heard.
 
-Quality across that tail varies a great deal. Korean, German, French, Portuguese, Italian,
-Chinese, Polish, Dutch and Turkish are all well covered by both model and recognition; a
-language with little presence in the training data will be understood but spoken awkwardly.
-Test yours before committing to it: `Tools > Offline AI NPC > Live verification` will
-speak a line in the language you are considering, and in Play mode run a whole turn in it.
-
-The plugin's built-in catalog already *configures* Japanese, Spanish, Russian and Simplified
-Chinese — prompt wording, length rule, recognition code — with the voice slot **empty**. A
-character in those languages thinks and writes out of the box; the speech engine reports
-"no voice is configured" until you point the definition at a voice you have cleared. That is
-deliberate: shipping a voice whose licence excludes commercial products would put your game
-in breach by default.
+The plugin's built-in catalog configures five languages. [The Interview](InterviewDemo.md) configures all ten listed above, including its interface and case text. A model's language capability and a game's translated UI are separate requirements.
 
 ### Adding a language, start to finish
 
-1. **Get a voice.** Piper publishes voices for around fifty languages at
-   `huggingface.co/rhasspy/piper-voices`. **Download both files** — `name.onnx` and
-   `name.onnx.json`. A missing `.json` produces silence with no error.
-2. **Put them** in your Piper `voices/` folder.
+1. **Get a voice.** If Qwen3-TTS speaks the language (see Tier 1), you already have one:
+   pick a speaker name. Otherwise Piper publishes voices for around fifty languages at
+   `huggingface.co/rhasspy/piper-voices` — **download both files**, `name.onnx` and
+   `name.onnx.json`. The current Piper driver refuses an absent or invalid paired config
+   and names the problem; setup checks flag it before you try a reply.
+2. **Put a Piper voice** in `StreamingAssets/piper/voices/`. A Qwen3-TTS speaker needs no file.
 3. **Create the language asset**: `Create ▸ Offline AI NPC ▸ Language Definition`. Fill in:
 
    Every field on the asset, in the order the inspector shows them. Nothing here is
@@ -77,15 +112,17 @@ in breach by default.
    | Code | `ko` | The identity. Keep it stable — everything keys on it |
    | Display name | `한국어` | Shown in your language picker |
    | **Speech** | | |
-   | TTS engine id | `piper` | Which engine speaks this language. `piper` unless you added one |
-   | TTS voice id | `ko_KR-example-medium.onnx` | The file from step 1. For VOICEVOX, a speaker number |
-   | STT model id | `ggml-small.bin` | The recognition model, when it differs per language. Blank = the project default |
+   | TTS engine id | `qwen3-tts` | Which engine speaks this language: `qwen3-tts`, `piper`, or the id of your own |
+   | TTS voice id | `serena` | A Qwen3-TTS speaker name; for Piper, the file from step 1; for your own engine, whatever it understands |
+   | STT model id | `ggml-small.bin` | Metadata for recognizers that use this field. Built-in Whisper chooses Model File Name or the current preset at startup |
    | STT language code | `ko` | Handed to recognition. Usually `Code` without the region part |
    | **Prompting** | | |
    | Persona header | `한국어로만 대답하세요.` | How the persona block is introduced — *in that language* |
-   | State header | `지금:` | How world state (time, weather) is introduced. Also in that language |
+   | State header | `지금:` | Header of the character's internal-state block ("Right now"). Also in that language |
+   | Nearby header | `주변:` | Header of the nearby-objects block |
+   | Target hint | `대상은 위 목록의 id 중 하나입니다.` | The sentence that says an action's target is one of those ids |
    | **Reply length** | | |
-   | Length instruction | `한 문장으로 짧게 대답하세요.` | The rule the model reads. Leave empty and one is generated — in Japanese, Chinese or English; any other language gets the English phrase, so write your own |
+   | Length instruction | `한 문장으로 짧게 대답하세요.` | The rule the model reads, written in that language. Leave it empty and the language directive carries no length sentence |
    | Length unit | `Characters` | **Words are meaningless without word spacing** |
    | Length target | `30` | Characters for CJK, ~12 words otherwise |
    | **Max tokens** | `48` | The hard stop. This is what actually bounds the reply — the instruction is a request, this is a limit |
@@ -95,8 +132,24 @@ in breach by default.
    [Troubleshooting](Troubleshooting.md) both name them as the only thing that genuinely
    controls reply length. A prompt asking for brevity is not a limit; these two are.
 
-   A filled-in asset — German, a language this plugin ships no voice for, which is exactly
-   the case the asset exists to cover:
+   They are data until dialogue code applies them. On a **Hello NPC Character**, set
+   **Reply Limits** to **Current Language**: this language's **Max tokens** becomes the
+   token ceiling of each reply, and its **Max sentences** ends what is spoken, shown and
+   remembered. Your own dialogue code does the same in a few lines:
+
+   ```csharp
+   var spec = LanguageRuntime.Current;
+   var profile = spec.LengthRule.ApplyTo(Tiers.Sampling);
+   host.ApplySampling(profile);                            // Max tokens reaches the model
+   reply = profile.LimitSentences(reply);                  // Max sentences ends the reply
+   systemPrompt += "\n\n" + LanguageDirective.For(spec);   // persona header + length instruction
+   ```
+
+   The persona header and the length instruction reach the model only through that last
+   line. Hello NPC speaks the language of its own system prompt and does not add them.
+
+   A filled-in asset using a separately supplied German Piper voice. Qwen3-TTS also
+   supports German; this screenshot illustrates choosing another engine and voice:
 
    ![A Language Definition asset with every field filled in](images/language-definition.png)
 
@@ -111,8 +164,8 @@ in breach by default.
    LanguageRuntime.Catalog = myLanguageSet.ToCatalog();
    ```
 
-5. **Bind the voice engine** for the code in `TTSEngineManager`'s binding table. Piper serves
-   any number of languages; only Japanese needs a different engine here.
+5. **Nothing to bind.** The TTS manager routes the code to the engine its definition names
+   (`INamedTtsEngine`); a row in the binding table is needed only to override that.
 
 That is the whole process. There is no list of approved languages in the code, and **the
 plugin does not gate on this page** — if you have a good Korean voice and a model that
@@ -125,12 +178,8 @@ language, or the model reads English fragments inside a Korean prompt.
 
 ### Two things that will bite you
 
-**Write the instructions in the target language.** An instruction the model cannot read is
-not an instruction. This was measured: with a Russian directive that only said "no English
-words", Qwen3-4B still reached for another script in 3 replies out of 12 — `corridors`,
-`thanks`, once a Chinese word for "tonight". Naming the *script* explicitly — "write only in
-Cyrillic" —
-took that to 0 out of 8. Say which alphabet, not just which language.
+**Write the instructions in the target language.** If a specific script is required,
+name it explicitly and check the model's replies.
 
 **Count characters, not words, for CJK.** "Twelve words or fewer" cannot be evaluated in a
 language without spaces between words. The length unit exists for this.
@@ -156,14 +205,20 @@ release.
 LanguageRuntime.SetCurrent("ko");
 ```
 
-The speech engines follow the runtime by default, so this one call is the whole switch. A
+The TTS engine follows the runtime by default. Whisper receives the selected recognition
+language but keeps its loaded model; use a multilingual model when players can switch languages. A
 project that keeps the current language somewhere of its own wraps it in an `ILanguageSource`
 and assigns `TTSEngineManager.LanguageSource` instead; `LanguageRuntime.TrySetCurrent`
 refuses a code the catalog does not configure, where `SetCurrent` accepts it and warns once.
 
-This restarts the speech engine with the new voice and invalidates the prompt cache, so the
-next reply pays the cold cost (~2.1 s on the reference machine). Rapid changes are coalesced,
-so dragging a settings dropdown does not queue five restarts. **Switch on a menu screen, not
+Changing language can require additional prompt processing. See
+[Limitations](Limitations.md#switching-language-mid-session) for switching behavior.
+In the DLL route, Qwen3-TTS switches in place — one native context serves every supported language; Piper
+stops and restarts with the new voice file. Rapid changes are coalesced, so dragging a
+settings dropdown does not queue five restarts. If a language has no usable engine,
+`TTSEngineManager.Active` becomes null and the previous engine stops; the manager does
+not keep speaking with the previous language's voice. Fix the binding and select the
+language again to recover. **Switch on a menu screen, not
 mid-conversation.**
 
 To ask what is configured rather than assuming:
@@ -173,10 +228,9 @@ if (!LanguageRuntime.IsConfigured("ko"))
     // ... offer the download, or fall back
 ```
 
-`IsConfigured` answers about the actual catalog. Do not use `Find`/`FindOrDefault` for this
-question: they fall back to the default language, so an unconfigured code comes back looking
-supported. That exact conflation once made a verification matrix report Russian as verified
-after hearing an English voice say an English sentence.
+`IsConfigured` checks the configured catalog. `LanguageCatalog.Find` returns null
+when no matching language is configured. `FindOrDefault` falls back to the default
+language, so do not use it to check whether a language is configured.
 
 ---
 
@@ -189,9 +243,8 @@ speakers in the same scene sound different. See [Dialogue](Dialogue.md#voices).
 
 ## Bring your own engine
 
-The package ships Piper because it is offline, permissively licensed and has a voice whose
-provenance clears. It is not the only engine you can use, and the seam for adding another is
-deliberately small.
+The package supports two engines — Qwen3-TTS, which the built-in definitions select, and
+Piper — and neither is the only one you can use. The seam for adding another is deliberately small.
 
 ### The contract
 
@@ -265,8 +318,8 @@ Piper process is one voice.
 Give the engine an id. `INamedTtsEngine` is one property — `EngineId => "voicevox"` — and
 it is what the language definition's *TTS engine id* refers to: a language whose definition
 names an engine reaches it **without a row in the TTS manager's binding table**. Piper's id
-is `piper`, which is why a new Piper-voiced language is one asset and no wiring. A row, when
-present, still wins.
+is `piper`, which is why a new Piper-voiced language needs its definition and no binding row.
+A row, when present, still wins.
 
 Two more things the plugin does for you here. A crash watchdog that must not resurrect a
 process while another engine is speaking implements `IActiveAwareEngine` and is handed the
@@ -293,6 +346,8 @@ What the implementation does, before the code itself:
    secondary English voice (one process per voice file); VOICEVOX needs it on every request.
 4. **`SetLanguage`** is where a multi-language engine switches; VOICEVOX is Japanese only, so
    this example does not implement `ILanguageAwareEngine`.
+5. **`EngineId`** names it `voicevox` (`INamedTtsEngine`), so the Japanese definition's *TTS
+   engine id* reaches it without a row in the TTS manager's binding table.
 
 The one thing worth copying verbatim is the readiness handling. An engine that reports ready
 before it is produces silence with no error, which is the hardest speech failure to diagnose.
@@ -310,15 +365,17 @@ using UnityEngine.Networking;
 namespace YourGame.Speech
 {
     /// <summary>
-    /// VOICEVOX as an ITTSEngine: an external HTTP server, four members, no plugin changes.
-    /// Drop this component in the scene and bind it to "ja" (see Bind a voice, above).
+    /// VOICEVOX as an ITTSEngine: an external HTTP server, no plugin changes.
+    /// Drop this component in the scene, add it to the TTS Engine Manager's Engines, and set
+    /// the Japanese language definition's TTS engine id to "voicevox" — the EngineId below.
     /// </summary>
-    public class VoicevoxEngine : MonoBehaviour, ITTSEngine
+    public class VoicevoxEngine : MonoBehaviour, ITTSEngine, INamedTtsEngine
     {
         [SerializeField] private string _baseUrl = "http://localhost:50021";
         [SerializeField] private float _healthCheckTimeout = 2f;
-        [SerializeField] private float _healthRetryInterval = 3f;  // re-check cadence while Active + not yet ready
+        [SerializeField] private float _healthRetryInterval = 3f;  // re-check cadence while not yet ready
 
+        public string EngineId => "voicevox";
         public bool IsReady { get; private set; }
 
         private Coroutine _healthRetry;
@@ -338,13 +395,13 @@ namespace YourGame.Speech
             else
             {
                 Debug.LogWarning($"[VoicevoxEngine] VOICEVOX server not reachable at {_baseUrl}: {req.error} — retrying");
-                StartHealthRetry();   // server may still be opening port 50021
+                StartHealthRetry();   // the server may still be opening its port
             }
         }
 
         public Task StopAsync()
         {
-            // VOICEVOX is user-managed (external process). We don't kill it on language switch.
+            // VOICEVOX is the player's own process: stopping the engine does not close it.
             IsReady = false;
             if (_healthRetry != null) { StopCoroutine(_healthRetry); _healthRetry = null; }
             return Task.CompletedTask;
@@ -356,10 +413,9 @@ namespace YourGame.Speech
             _healthRetry = StartCoroutine(HealthRetryLoop());
         }
 
-        // VOICEVOX.exe may still be opening port 50021 when we boot in JP. Instead of
-        // muting Japanese TTS for the whole session, re-poll /version until it answers
-        // (or until StopAsync stops us on a switch away). Mirrors the Piper watchdog:
-        // IsReady ends up meaning the same thing in both ITTSEngine implementations.
+        // VOICEVOX may still be opening port 50021 when the game starts. Rather than mute the
+        // language for the whole session, poll /version until it answers, or until StopAsync
+        // stops the loop on a switch away.
         private IEnumerator HealthRetryLoop()
         {
             while (!IsReady)
@@ -403,18 +459,25 @@ namespace YourGame.Speech
                 yield break;
             }
 
+            // The contract: onAudio at most once, and never on failure.
             AudioClip clip = DownloadHandlerAudioClip.GetContent(synth);
+            if (clip == null)
+            {
+                Debug.LogError("[VoicevoxEngine] the WAV could not be decoded");
+                yield break;
+            }
             var audio = AudioClipConversion.FromClip(clip);
-            if (clip != null) UnityEngine.Object.Destroy(clip);
+            UnityEngine.Object.Destroy(clip);
             onAudio?.Invoke(audio);
         }
     }
 }
 ```
 
-`AudioClipConversion` and `AudioData` come from `OfflineAINPC.Speech`; nothing else here is
-plugin-specific. Bind it to Japanese and the rest of the pipeline — queue, ducking, lip
-sync, subtitles — does not know the difference.
+`ITTSEngine`, `INamedTtsEngine`, `AudioClipConversion` and `AudioData` come from
+`OfflineAINPC.Speech`; nothing else here is plugin-specific. Point the Japanese definition at
+it and the rest of the pipeline — the speech queue and the subtitles — does not know the
+difference.
 
 ### Licensing: apply the test, do not take a list
 
@@ -432,3 +495,5 @@ What travels between projects is the test, and by now you have seen two shapes o
 
 Both are the same question asked twice: *what is this made of, and who could object?* See
 [Licensing](Licensing.md) for the long form.
+
+<a id="installing-the-speech-engine"></a>

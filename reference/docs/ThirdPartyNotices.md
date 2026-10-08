@@ -1,88 +1,105 @@
 # Third-party notices — Offline AI NPC
 
-Every third-party component the plugin touches: the dependencies you install, the external
-processes it drives, and the model and voice files it downloads or lets you point it at.
-Nothing third-party is bundled in the package itself — `Assets/OfflineAINPC/` contains only
-the plugin's own code, documentation and these notices. Missing notices are a documented
-Asset Store rejection reason, so this file is kept current with every dependency change.
+This is a scoped inventory, not a licence grant or clearance of an entire native/model
+stack. The plugin export contains its own code, configuration and documentation, plus text
+compatibility sources with their original licences and modification notices. External
+packages, model weights, Piper and espeak data are installed separately. The exact Windows x64 CPU Qwen native DLL is included as described below.
+An actual game distribution can include components that the Asset Store package excludes.
 
-**"Verified" column:** the date the licence text was read at the source linked in the row.
-Where a dated copy is archived next to this file, the row says so.
+The dated source revisions and remaining build/data gaps are in
+[`STACK_SOURCE_INVENTORY_2026-10-02.md`](STACK_SOURCE_INVENTORY_2026-10-02.md).
+An observed source tag, expected weight hash and installed binary hash are different pins.
+Retain the notices of the exact artifacts you redistribute.
 
----
+## Bundled compatibility source text
 
-## Dependencies you install (never bundled)
+`Editor/Dependencies/CompatibilityData/ai.undream.llm/` retains the LLMUnity 3.0.3
+Apache-2.0 licence, original third-party notices, source revision, exact before/after
+hashes and modified source text. `Editor/Dependencies/CompatibilityData/com.whisper.unity/`
+retains the whisper.unity 529a MIT copyright/permission notice, source revision, exact
+before/after hashes and two modified managed source files. Payloads are data files;
+they do not compile a second SDK when this plugin is imported. Both directories include
+modification notices. These compatibility-source changes include no model files or SDK native binaries. The separately described Qwen DLL delivery is included in the package.
+The optional compatibility window applies them only after Preview and an explicit Apply.
 
-Bundling either would give anyone who already has them duplicate-assembly compile errors,
-so the plugin declares them and compiles the code that touches them only when they are
-present (`versionDefines` on the package ids).
+## External Unity dependencies
 
-| Component | Author | Licence | Source | How it is used | Verified |
-|---|---|---|---|---|---|
-| LLM for Unity (LLMUnity) | UndreamAI | Apache-2.0 | https://github.com/undreamai/LLMUnity | The language model host. `OfflineAINPC.LLMUnity` and the HelloNpc sample compile only when `ai.undream.llm` is installed. | 2026-08 (`LICENSE.md`, v3.0.3) |
-| LlamaLib | UndreamAI | Apache-2.0 | https://github.com/undreamai/LlamaLib | Native llama.cpp build shipped inside LLM for Unity. Not redistributed by this plugin. | 2026-09-12 (upstream `LICENSE`) |
-| llama.cpp | The ggml authors | MIT | https://github.com/ggml-org/llama.cpp | Inference engine underneath LlamaLib. | 2026-09-12 (upstream `LICENSE`) |
-| whisper.unity | Macoron | MIT | https://github.com/Macoron/whisper.unity | Speech recognition bindings. Optional; typed input works without it. | 2026-08 (`package.json`, v1.4.0) |
-| whisper.cpp | The ggml authors | MIT | https://github.com/ggml-org/whisper.cpp | Native recogniser underneath whisper.unity. | 2026-09-12 (upstream `LICENSE`) |
+| Component | Source licence | Evidence and distribution boundary |
+|---|---|---|
+| LLM for Unity v3.0.3, UndreamAI | Apache-2.0 | [Source](https://github.com/undreamai/LLMUnity/tree/9931a9ea46906b1f43adaf9498c05ccf227b5d0b). External dependency; its Editor setup can download LlamaLib v2.0.5. |
+| LlamaLib v2.0.5, UndreamAI | Apache-2.0 | [Source](https://github.com/undreamai/LlamaLib/tree/21d3b9dcd1c05ad13f94f198e59462960019a057). Native distribution includes patched llama.cpp and other libraries. |
+| llama.cpp, ggml authors | MIT | LlamaLib pins 872646b30c342c5fa98efec002f94fdb4f1f1ea5 and applies patches; that source pin is not proof of every installed build. |
+| FeatureDetector | CC0-1.0 | LlamaLib submodule 077393260d5e0e19938582a33b9dd0e74baa8ff2. |
+| USearch C# bindings and six native artifacts | Apache-2.0 source text | Included by LLMUnity, outside this plugin. Local bytes match its v3.0.3 tree; the original NuGet/native build revision remains unknown. Retain its actual copyright/NOTICE material. |
+| whisper.unity v1.4.0, Macoron | MIT | [Integrator](https://github.com/Macoron/whisper.unity/tree/529a628a915a97799e89e061af9cb7c71407124d). Optional recognition bindings and native libraries; typed input works without it. |
+| whisper.cpp and its ggml libraries | MIT source | The integrator workflow defaults to v1.7.5 but permits a different build ref. Exact native source/build linkage remains pending. |
+| Newtonsoft.Json / Unity package 3.2.2 | MIT notices | LLMUnity's dependency. The plugin uses its own JSON reader and does not itself require Newtonsoft.Json. |
 
-The plugin has **no** package dependency of its own beyond the Unity engine: it reads its
-own JSON (`Core/Serialization`) and does not require Newtonsoft.Json. LLM for Unity declares
-Newtonsoft for itself.
+OpenSSL, cpp-httplib, nlohmann/json, OpenMP/compiler runtimes and backend libraries must
+be included in the relevant native build's inventory. Source licences do not identify
+the versions or notices of every installed runtime. The development installation contains
+NVIDIA CUDA/cuBLAS and Vulkan loader DLLs; NVIDIA EULA and runtime-specific redistribution
+conditions require separate review.
 
-## External processes the plugin drives (not redistributed)
+## Included Qwen native speech library
 
-Separate executables you install. The plugin starts, talks to, and shuts them down; it does
-not ship their binaries, and the export excludes anything that looks like one.
+`Plugins/Windows/x86_64/OfflineAINPCQwenNative.dll` is the ordinary empty-URL Qwen route.
+Its [delivery manifest](../Plugins/Windows/x86_64/native-build-manifest.json) identifies
+5366978 bytes, SHA256 `4de29ccecbb2962452c2c9f2a1a4dbcc49f1c56e50f5aad74cb25a1739d0d9f3`,
+qwentts.cpp `6fae92914045cd83364d2845ceaa0f7969727319` and ggml
+`40e16e4a814f7fe851a0c486fb9e8c722e957830`. This is Windows x64 CPU, eight threads,
+static ggml, flash attention off and max batch one. The DLL's actual Unity Editor/model
+and built Player acceptance remains pending; no Linux/macOS binary is included.
 
-> **The espeak-ng row decides whether a *game* built with this can ship Piper.** What
-> "external process" has to mean in practice and what a buyer owes if they redistribute Piper
-> are in [`ESPEAK_BOUNDARY.md`](ESPEAK_BOUNDARY.md). The package itself contains none of it.
+qwentts.cpp and ggml are MIT. The static MinGW-w64 runtime has its own notices,
+including winpthreads; GCC runtime code is GPLv3 with Runtime Library Exception 3.1.
+Preserve all five exact files in `Plugins/Windows/x86_64/Notices/`: `qwentts-LICENSE.txt`,
+`ggml-LICENSE.txt`, `MinGW-w64-runtime.txt`, `GPL-3.0.txt` and `GCC-RUNTIME-EXCEPTION.txt`.
+The exception applies under its stated Eligible Compilation Process / Independent Module
+conditions; it is not a blanket MIT label or the Piper/eSpeak GPL distribution boundary.
+The talker and codec are separate Apache-2.0 weight downloads, not bytes in this DLL.
 
-| Component | Author | Licence | Source | How it is used | Verified |
-|---|---|---|---|---|---|
-| Piper | Michael Hansen (rhasspy) | MIT | https://github.com/rhasspy/piper | External process, one `piper.exe` per voice, driven over stdin JSON. | 2026-09-12 (upstream `LICENSE.md`) |
-| piper-phonemize | Michael Hansen (rhasspy) | MIT | https://github.com/rhasspy/piper-phonemize | Ships with Piper; text to phonemes. | 2026-09-12 (upstream `LICENSE.md`) |
-| **espeak-ng** | Reece Dunn and contributors | **GPL-3.0** | https://github.com/espeak-ng/espeak-ng | Used *by piper-phonemize* inside the Piper process. **Copyleft — a hard constraint:** it stays an external process you install, never a bundled or linked component of the package. | 2026-08 (`GPL-3.0.txt` archived here, espeak-ng 1.52.0) |
-| ONNX Runtime | Microsoft | MIT | https://github.com/microsoft/onnxruntime | Ships with Piper; runs the voice models. | 2026-09-12 (upstream `LICENSE`) |
-| VOICEVOX ENGINE | Hiroshiba Kazuyuki and contributors | LGPL-3.0, with a separate commercial licence offered upstream | https://github.com/VOICEVOX/voicevox_engine | Not shipped and not integrated. Named in the documentation as the usual Japanese engine a project connects through `ITTSEngine`; you install and manage it. | 2026-09-12 (upstream `LICENSE`) |
-| VOICEVOX character voices | per-character rights holders | per-character terms | https://voicevox.hiroshiba.jp/term/ | If you connect VOICEVOX: each character's terms bind the END USER. Surface them in your credits; the plugin does not absorb them. | terms page read 2026-08 |
+## External speech engines
 
-## Model weights (downloaded by the Model Manager or supplied by you, not shipped)
+| Component | Source licence | Current scope |
+|---|---|---|
+| qwentts.cpp, omnivoice.cpp authors | MIT | [Original source pin](https://github.com/ServeurpersoCom/qwentts.cpp/tree/71ad93d591a2811f35db77e27c02acba091c9e9b), ggml 77cdef82aad64f141164fac02076e36d5848474c; cpp-httplib and yyjson are MIT. An installed executable needs its own source/build/artifact receipt. |
+| Archived Piper, Michael Hansen | MIT source | [2023.11.14-2](https://github.com/rhasspy/piper/tree/38917ffd8c0e219c6581d73e07b30ef1d572fce1). Supported separate process; preserve working user configurations. The newer OHF GPL project is a different distribution. |
+| Archived piper-phonemize | MIT source | Piper's phonemizer; exact installed revision remains pending. The archived master snapshot is not proof of a 2023 release's build. |
+| espeak-ng fork and dictionaries | GPL-3.0 source/data terms | Linked within Piper. Exact fork, generated dictionary inputs/build and Corresponding Source must match the distributed artifacts. See [boundary](ESPEAK_BOUNDARY.md). |
+| ONNX Runtime | MIT + third-party notices | Existing Piper DLL resource metadata is consistent with a 1.14-era build; this does not replace a complete binary/source match or its ThirdPartyNotices. |
+| fmt / spdlog | MIT | Archived Piper CMake requests fmt 10.0.0 and spdlog 1.12.0. Verify actual build inputs. |
+| libtashkeel_model.ort | UNKNOWN weight/data provenance | Phonemizer distribution includes this Arabic preprocessing model. Code MIT does not establish its weight/data licence. No weight bytes were opened in the audit. |
+| VOICEVOX ENGINE / character voices | Software and per-character terms | Documentation-only extension example; not shipped, integrated or cleared as a profile here. Review the exact software edition and each voice's terms. |
 
-Dated copies of each licence and model card are in `model-cards-2026-08-16/` (the 8B copies
-were added 2026-09-12), taken from the repositories the weights are pulled from. A
-quantisation repository can carry terms of its own on top of the base model, so the copy is
-of the repository that serves the file — here all three are Qwen's own, all Apache-2.0.
+Built-in presets use Qwen3-TTS CustomVoice. Preserve existing Piper selections and
+review the exact licence boundary of any engine or voice you add.
 
-| Component | Author | Licence | Source | How it is used | Verified |
-|---|---|---|---|---|---|
-| Qwen3-1.7B (GGUF, Q8_0) | Alibaba Cloud / Qwen team | Apache-2.0 | https://huggingface.co/Qwen/Qwen3-1.7B-GGUF | The Light tier's model in the default catalog. | 2026-08-16 (archived) |
-| Qwen3-4B (GGUF, Q4_K_M) | Alibaba Cloud / Qwen team | Apache-2.0 | https://huggingface.co/Qwen/Qwen3-4B-GGUF | The Standard tier's model; the one the documented figures were measured on. | 2026-08-16 (archived) |
-| Qwen3-8B (GGUF, Q4_K_M) | Alibaba Cloud / Qwen team | Apache-2.0 | https://huggingface.co/Qwen/Qwen3-8B-GGUF | The Premium tier's model. | 2026-09-12 (archived) |
-| Whisper ggml models (`tiny.en`, `base.en`, `base`, `small`) | OpenAI; ggml conversions by the ggml authors | MIT | https://huggingface.co/ggerganov/whisper.cpp | Speech-recognition weights the presets point at. Downloaded on request, never bundled. | 2026-09-12 (repository `LICENSE`) |
+## Model and voice files
 
-## Voice models (downloaded by the Presets window or supplied by you, not shipped)
+| Files | Declared terms and provenance boundary |
+|---|---|
+| Qwen3-1.7B Q8_0; Qwen3-4B / 8B Q4_K_M GGUF | Qwen repositories advertise Apache-2.0; full archived licence texts exist. Corpus categories/methods are described, but a full record-permission inventory is not disclosed. |
+| Qwen3-TTS 0.6B / 1.7B CustomVoice talkers and 12Hz tokenizer GGUF | Official base/codec and Serveurperso conversion repositories advertise Apache-2.0. Preserve conversion provenance and all applicable notices; preset-timbre recording permissions remain unknown. |
+| Whisper tiny.en, base.en, base, small ggml | MIT original models and separate conversion provenance. Expected hashes for these four are absent from the current preset catalog; metadata hashes are recorded in the dated inventory. |
+| Piper ljspeech medium/high | Card records public-domain LJ Speech and training from scratch. It does not waive engine/model distribution notices. |
+| Piper libritts-high, 904 speakers | Card records CC BY 4.0 LibriTTS train-clean-360 and training from scratch. Preserve applicable dataset/model attribution. |
+| Piper dmitri, sharvard and other lessac fine-tunes | Dataset label and fine-tune base are separate. Current project policy holds new recommended profiles where the base has restrictive/undocumented provenance; existing user configs remain. |
+| NonCommercial / unknown voice candidates | No new recommendation or support is created by this inventory. |
 
-Piper voices are licensed **per dataset**, and the training line on the card matters as
-much as the licence line. The full reading, with the near-misses, is
-[`VOICE_LICENCES.md`](VOICE_LICENCES.md); dated copies of the cards are in
-`voice-cards-2026-07-30/`.
+Weights are never bundled in this plugin. Model Manager downloads require an explicit
+user action; LLMUnity's Editor library bootstrap is a separate dependency action. The
+catalog's repository URLs may resolve a mutable `main`; configured SHA256 pins expected
+bytes where present, not the repository's complete licensing or training history.
 
-| Voice | Speakers | Dataset licence | Training | Where it is used | Attribution owed |
-|---|---|---|---|---|---|
-| `en_US-ljspeech-medium` | 1 | public domain (LJ Speech) | trained from scratch | the English default in the presets and in `PiperEngine` | none |
-| `en_US-ljspeech-high` | 1 | public domain (LJ Speech) | trained from scratch | the English Premium preset and the secondary English voice | none |
-| `en_US-libritts-high` | 904 | CC BY 4.0 (LibriTTS) | trained from scratch | documented opt-in for projects wanting many distinct voices | **yes** — credit LibriTTS / the CC BY notice in your game |
+## Required release evidence
 
-Every other language's voice slot in the shipped presets is **empty**, with the reason in
-the preset itself: no voice with a traceable commercial provenance was found for it. Voices
-you add are yours to clear; `VOICE_LICENCES.md` shows the test to apply.
+Before redistributing a chosen stack, record exact binary and model hashes, source/build
+revisions and patches, licence/copyright/NOTICE copies, and dictionary and preprocessing
+data. GPL-covered components additionally need a compliant Corresponding Source distribution
+method. This inventory leaves unresolved items explicit.
 
----
-
-## What the package export contains
-
-`Tools ▸ Offline AI NPC ▸ Export .unitypackage…` takes everything under `Assets/OfflineAINPC/`
-except `Tests/` and the packaging tools. A test in the source repository fails if an engine
-binary, an `espeak-ng-data/` folder, or a `.onnx` / `.gguf` file ever appears under the
-package folder, so none of the components above can travel by accident.
+The export preflight allows only the exact named Qwen native DLL matching the delivery
+policy; model weights, unrelated native payloads and espeak data remain excluded. Keep
+the five native notices selected in the export. Verify the actual export and separate
+game distribution before release.

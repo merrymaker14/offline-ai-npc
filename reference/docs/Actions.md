@@ -9,13 +9,15 @@ It stopped raining. Come and see.
 ```
 
 With a grammar binding on the character (an **LLMUnity Grammar Binding** driven by
-`ActionTurn`, below) the first line is generated under a **grammar**, so its shape cannot be
-wrong; without one the parser still reads it and rejects what does not fit. The rest is
-ordinary prose and flows through the streaming speech pipeline sentence by sentence.
+`ActionTurn`, below), a valid completed output follows the successfully applied **grammar**.
+Without a binding, or if grammar application fails, the parser still reads the action
+and rejects what does not fit. The rest is ordinary prose and flows through the streaming
+speech pipeline sentence by sentence.
 
-Do not hope the model formats correctly — constrain it. llama.cpp masks invalid tokens at
-every step, which makes a broken action block structurally impossible rather than
-unlikely.
+Use grammar constraints for structure, and parser/handler checks for validity in your
+game. llama.cpp masks tokens that the applied grammar excludes. This does not guarantee
+a complete reply after cancellation, a generation error or a length cutoff, and it does
+not make free-form prose factually correct.
 
 ## What a verb is
 
@@ -88,8 +90,10 @@ An Action Target with an empty id derives one from the object's name the same wa
 time — "Tall Window (2)" becomes `tall_window_2` — so two objects with the same name
 collide visibly in the console rather than one of them silently winning.
 
-A disabled target leaves the grammar, so the model literally cannot refer to an object
-that is not there.
+A disabled target is removed from the registered set used to build the next grammar.
+With that grammar applied, a valid action's `action.target` must come from its target enum.
+This does not stop ordinary prose from mentioning an absent object, and the world can
+change after the schema was built.
 
 **If the object already has an AI Point Of Interest, it is already a target.** Perception's
 component implements the same `IActionTarget`, so adding an Action Target beside it registers
@@ -126,12 +130,13 @@ public class Doors : MonoBehaviour, IActionHandler
 ```
 
 `NpcAction` carries the resolved target object, not just its id, and parameters already
-validated against the verb. There is nothing left to re-check. Ask `action.Target.AimPointOf()`
+validated against the verb. Your handler still owns current gameplay preconditions. Ask `action.Target.AimPointOf()`
 where the target is: it answers null for a target that was destroyed between generation and
 dispatch instead of throwing.
 
 A handler that throws is contained and logged: it loses its action, never the
-conversation.
+conversation. A custom target whose `IVerbRestrictedTarget.Accepts` callback throws
+produces an `Invalid` parse result with a diagnostic; it does not escape the parser.
 
 ## Wiring a turn
 
@@ -184,11 +189,18 @@ history.
 
 * The action block is **optional** — most replies are pure conversation, and the grammar
   never forces one.
-* Speech is **never** blank and never starts with `{`, so an action can never arrive
-  instead of a reply.
+* A **valid completed reply under the successfully applied normal reply grammar** has
+  a required prose segment that does not start with `{`. This is a format constraint,
+  not a guarantee of a visibly nonblank subtitle or a promise
+  of speech after cancellation/error, a truncated generation or an absent/failed grammar
+  binding. The action-only repair format is separate.
 * A malformed block degrades into speech rather than swallowing the line; a leading block
   that names no `verb` (an emoticon in braces) is not an action and is not repaired.
 * A rejected action gets **one** corrective round, then is dropped with a log line.
+  `CompleteRepair` accepts a result only while `NeedsRepair` is true. It cannot start
+  an action before a rejected block, repeat a valid action, or retry a receiver that
+  threw after changing game state. Receiver exceptions do not undo those changes;
+  your handler owns gameplay transactions and preconditions.
 * The prompt frame — "Available actions", "never read the action line aloud", the repair
   prompt — is in the character's language for the five shipped codes (`ActionPhrasing`),
   and a sixth is a `Register` call.

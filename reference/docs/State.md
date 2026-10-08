@@ -8,9 +8,10 @@
 > a character who often mentions how it feels when the subject comes up, not one who always
 > does, and not one who volunteers it unprompted in a one-sentence reply.
 >
-> The deterministic half is not probabilistic at all: threshold events, trait numbers,
-> save/load, and the model being structurally unable to change a need all behave exactly
-> as specified, every time.
+> State writes, trait modifiers and threshold rules run in deterministic C# under the
+> conditions below. Persistence depends on the configured store and its success/failure
+> contract; opting in does not prove a durable write. The model may change only axes
+> opened to model writes, within their configured bounds.
 
 
 ---
@@ -182,9 +183,13 @@ built from the axes that opened themselves to it:
 {"verb":"feel","params":{"axis":"mood","delta":-2,"reason":"..."}}
 ```
 
-Axes with `MaxModelDelta = 0` are not in that choice, so a need is **unreachable** rather
-than rejected — a character cannot decide it is no longer tired. Open axes are clamped
-per reply, whether the model nudges them or tries to set them outright.
+Axes with `MaxModelDelta = 0` are excluded from the `feel` axis choice when the schema is
+built. With the grammar successfully applied, that choice constrains `params.axis` in a
+valid completed action; it does not constrain what the character may claim in ordinary
+prose. Runtime state checks also refuse model writes to closed axes and bound each write
+to an open axis, including when no grammar is available. Keep needs closed if only game
+code should satisfy them; a designer can explicitly open one. The normal action format
+allows at most one action per completed reply.
 
 ## Gating verbs by state
 
@@ -193,8 +198,20 @@ NpcStateComponent.VerbGate.RequireBand("race", "sleepiness", maxBand: "drowsy",
                                        note: "too tired to run");
 ```
 
-The verb leaves the grammar. The character does not refuse it — it was never offered.
-Verbs are filtered by state, targets by perception, and neither knows about the other.
+The rule removes the verb from the generated action schema when its condition fails.
+The component does not reach for a schema on its own: install the gate on the schema your
+turn uses, before the turn begins.
+
+```csharp
+state.ApplyVerbGate(schema);        // NpcActions.Schema, or the character's perception.Schema
+turn.Begin();
+```
+
+A schema shared by several characters carries the gate of whoever installed it last, so
+install it for the character whose turn it is.
+If the backend applies that grammar, a valid completed action cannot select the verb.
+Ordinary prose may still mention it. Verbs are filtered by state, targets by perception,
+and neither knows about the other.
 
 `Require(..., min:, max:)` takes numbers and still works; a numeric rule is re-checked on
 every change of its axis, not only on a band crossing. Prefer `RequireBand` all the same:
@@ -243,9 +260,30 @@ loading a slot means. Values for axes the current catalog no longer defines are 
 saved back** rather than dropped, with a warning naming them — a catalog edit is not a
 reason to lose a save, and a renamed axis is yours to migrate.
 
+Restoring also invalidates the cached verb list and grammar, without replaying threshold
+events. A character's available actions immediately follow the restored state.
+
 Saves are debounced (never more often than once a second, ten by default) and flushed on
 disable, on quit, and when the application pauses on mobile. Mood is session-only by
 design.
+
+Passive need changes count as dirty even when they stay inside one descriptor band.
+Failed writes stay dirty and retry after the debounce or at the next lifecycle flush.
+The built-in store refuses to overwrite an existing save when its read fails; it retries
+the read before saving. A custom `IStateStore` should throw on an unavailable read or a
+failed write: `TryLoad` returning `false` means no usable save was found, and `Save`
+returning normally means the write succeeded. The built-in PlayerPrefs adapter also
+reports a refused `SetString` or `Save` flush to the state component, while retaining
+the original non-throwing `Set` API. A future-schema save remains protected.
+
+A save that cannot be read is not used: the character starts from its defaults, and
+before the next save replaces it, `KeyValueStateStore` keeps the original under separate
+internal recovery keys. When that copy cannot be written and read back, nothing
+replaces the original. `KeyValueStateStore.Check(npcId)` says which case a character is
+in without writing anything — `Missing`, `Loaded`, `Damaged`, `Newer` (written by a newer
+plugin, never replaced) or `StoreFailed` — and `SetAsideKeys(npcId)` lists the kept
+copies; `Clear` removes the save and its current recovery copies. Older recovery keys
+are left for manual review because they may also belong to another character.
 
 ## Pause behaviour
 
@@ -257,3 +295,40 @@ The speech queue deliberately does the opposite and keeps running on unscaled ti
 `AudioSource` ignores `timeScale` and a line already sounding does not stop. See
 [Limitations](Limitations.md#pause-what-each-part-does-at-timescale--0) for the full
 per-subsystem table.
+
+## Invalid authored numbers
+
+Axis ranges, baselines, rates, hysteresis, model delta limits and band boundaries must be
+finite numbers. Trait baseline shifts and rate/sensitivity multipliers must be finite too.
+`NaN` and positive or negative infinity are configuration errors. Catalog validation and
+the catalog inspector identify the affected fields. Trait asset validation reports its
+findings in the Console. Runtime numerical safeguards also apply to plain-data traits.
+Correct the source settings instead of relying on a fallback for normal gameplay.
+
+The runtime checks the current definitions when using them, including edits made after
+creating a state model. An invalid baseline uses zero, clamped to a valid axis range.
+An invalid trait shift uses zero; an invalid trait multiplier uses one. A nonfinite axis
+rate disables ticking, a nonfinite model delta limit disables model writes, and nonfinite
+hysteresis uses the existing default of `0.08`. Bands with nonfinite boundaries do not
+match values. Finite tuning values retain their existing policy; these safeguards do not
+rewrite the authored assets or introduce a new tuning cap.
+
+A valid range has finite endpoints and `Max > Min`. With an invalid range, game, model and
+tick writes are refused and keep the stored value. An unset axis reads zero. Restoring an
+existing finite saved value preserves that number without clamping it through the broken
+range and without raising value-change or threshold events. This keeps relationships and
+needs available for the next save while you repair the catalog. With a valid range,
+restore still applies the usual clamp. Saved numbers are not automatically reclamped when
+you edit the catalog; a later ordinary write uses the repaired range.
+
+Arithmetic that overflows to a nonfinite result is refused before publishing a new state
+value. An overflowing computed rate or tick step leaves the current value unchanged.
+Notability remains finite in `0..1`, using wider intermediate arithmetic for valid large
+ranges and zero for an invalid range. These are data protections, not proof that an
+extreme configuration makes useful gameplay. The save schema, NPC ids, relationship
+keys and unknown-axis preservation policy are unchanged.
+
+The NPC State component inspector also reports problems in its assigned catalog and trait
+preset. When several different assets are selected, it reports that validation is
+undetermined instead of judging one arbitrary reference. Select a single character or
+its referenced asset to inspect and repair the field.

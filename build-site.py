@@ -40,6 +40,16 @@ TITLES = {
     "Actions": "Actions — Offline AI NPC",
     "Languages": "Languages — Offline AI NPC",
     "Recipes": "Recipes — Offline AI NPC",
+    "State": "State — Offline AI NPC",
+    "Perception": "Perception — Offline AI NPC",
+    "Limitations": "Limitations — Offline AI NPC",
+    "Licensing": "Licensing — Offline AI NPC",
+    "AgentTools": "Agent tools (MCP) — Offline AI NPC",
+    "CurrentModelUsage": "Using the local models — Offline AI NPC",
+    "QwenUsage": "Qwen speech — Offline AI NPC",
+    "UpgradingFrom1": "Upgrading from 1.0 — Offline AI NPC",
+    "ReleaseHistory": "Release history — Offline AI NPC",
+    "ESPEAK_BOUNDARY": "The espeak boundary — Offline AI NPC",
     "InterviewDemo": "The interview demo — Offline AI NPC",
     "Troubleshooting": "Troubleshooting — Offline AI NPC",
     "ThirdPartyNotices": "Third-party notices — Offline AI NPC",
@@ -126,8 +136,8 @@ def convert(path, depth):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s</title>
-<meta name="description" content="A local language model, local speech recognition and local speech synthesis for Unity characters. No cloud, no API keys, no telemetry.">
-<link rel="icon" href="%sassets/favicon.svg" type="image/svg+xml">
+<meta name="description" content="A local language model, speech recognition and a voice in ten languages for Unity characters. No cloud, no API keys, no telemetry.">
+<link rel="icon" href="%sassets/favicon.png" type="image/png">
 %s
 <style>
 %s
@@ -159,12 +169,7 @@ def main():
 
     shutil.copytree(os.path.join(HERE, "assets"), os.path.join(OUT, "assets"))
 
-    # A terminal-green square. Inline SVG so the site still loads nothing from anywhere.
-    io.open(os.path.join(OUT, "assets", "favicon.svg"), "w", encoding="utf-8", newline="\n").write(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">'
-        '<rect width="16" height="16" fill="#08090A"/>'
-        '<rect x="3" y="3" width="10" height="10" fill="none" stroke="#32CD32" stroke-width="1.5"/>'
-        '</svg>\n')
+    # The tab icon is the product's mark, assets/favicon.png, copied with the rest of assets.
 
     # Pages runs Jekyll unless told not to, and Jekyll skips files it does not understand.
     io.open(os.path.join(OUT, ".nojekyll"), "w", encoding="utf-8", newline="\n").write("")

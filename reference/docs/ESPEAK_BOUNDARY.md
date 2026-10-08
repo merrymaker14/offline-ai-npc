@@ -1,104 +1,68 @@
 # The espeak boundary
 
-Offline AI NPC ships under a proprietary Asset Store licence. One of the things it talks
-to — the Piper speech engine — links **espeak-ng, which is GPL-3.0**. This document says
-exactly where the line is, why the package survives on the correct side of it, and what
-changes the moment somebody moves a file.
+Piper is an optional external process. Its archived engine source is MIT, while its
+phonemizer links GPL-3.0 espeak-ng. A top-level MIT label does not cover the whole native
+distribution, its dictionaries, ONNX Runtime's notices or voice models.
 
-It is written for the one audience that has obligations here: **a buyer shipping a game**.
-Read section 3 before you ship; sections 1 and 2 are why the package itself is clean.
+## The current package boundary
 
----
+The plugin invokes Piper over stdin/stdout JSON, does not load its libraries into Unity,
+and can operate with another engine or typed input. Piper, espeak, their data and voice
+weights are installed outside `Assets/OfflineAINPC/`. The export preflight excludes
+native/model payloads and espeak data from that folder. This is a source/export rule;
+review the actual release package and game distribution separately.
 
-## 1. What is actually GPL, and what is not
+The [GNU aggregation FAQ](https://www.gnu.org/licenses/gpl-faq.html#MereAggregation)
+considers both the communication mechanism and its semantics. Separate processes and
+pipes support the documented boundary, but they are not an unconditional legal guarantee
+for every future integration. Distribution location alone also does not settle whether
+programs form one work. Keep the boundary and re-review changes that alter it.
 
-| Component | Licence | Where it runs |
-|---|---|---|
-| `piper.exe` | MIT (Piper itself) | Separate OS process |
-| `piper_phonemize.dll` | MIT | Loaded by `piper.exe` |
-| **`espeak-ng.dll`** | **GPL-3.0** | Loaded by `piper_phonemize` inside `piper.exe` |
-| `espeak-ng-data/` | GPL-3.0 (data files of the above) | Read by `espeak-ng.dll` |
-| `onnxruntime.dll` | MIT | Loaded by `piper.exe` |
-| Voice models (`*.onnx`) | **per dataset** — not uniformly permissive | Read by `piper.exe` |
-| Offline AI NPC (`Assets/OfflineAINPC/`) | proprietary | Your Unity process |
+## If distributing the Piper stack
 
-The GPL applies to espeak-ng and to anything that forms a single work with it. Piper's own
-MIT licence does not launder that: a binary distribution of `piper.exe` carries espeak-ng's
-terms with it.
+| Artifact | What must be identified |
+|---|---|
+| Piper executable and piper-phonemize | Exact source revisions, patches, build/install scripts and dependencies. |
+| espeak-ng library | GPL-covered source matching the actual binary, including the fork revision. |
+| espeak-ng-data | Exact dictionary sources, generated data and build inputs; individual notices where applicable. |
+| ONNX Runtime and other libraries | Actual versions, licence/copyright texts and ThirdPartyNotices. |
+| Voice weights / libtashkeel model | Their independent weight, dataset and fine-tune provenance. |
 
-## 2. Why the plugin is not a derivative work
+GPL-covered object-code distribution requires a method allowed by
+[GPL-3.0 sections 1 and 6](GPL-3.0.txt), licence/notices and no additional restrictions on
+the covered components. For section 6(d), equivalent no-charge Corresponding Source access
+and clear directions accompany the binary offering. Other section 6 methods have their
+own conditions. A generic upstream URL or written offer is not automatic compliance.
 
-Three facts, and all three have to stay true:
+Archived Piper's 2023.11.14-2 CMake can fetch a moving phonemizer branch. Its tag alone
+therefore does not identify the entire installed stack's Corresponding Source. The
+installed development binaries and 710 dictionary files are hashed in the dated audit;
+their exact source/build linkage remains pending. A version string is supporting evidence,
+not a substitute for that linkage.
 
-1. **Separate process.** The plugin starts `piper.exe` as a child process and speaks to it
-   over stdin/stdout as JSON. It does not link, `dllimport`, or load any espeak-ng or Piper
-   code into the Unity process.
-2. **Not distributed by the package.** Nothing under `Assets/OfflineAINPC/` is, contains, or
-   downloads a copy of Piper, espeak-ng, or their data. The user installs the engine
-   themselves and tells the plugin where it is.
-3. **Independent function.** The plugin works with no Piper at all — another engine, a
-   buyer's own, or silence. Piper is one of several things it can be pointed at, not a component
-   it is built out of.
+The current process boundary is designed to keep the plugin separate. Do not infer that
+every proprietary game, modified protocol or combined distribution is automatically
+cleared. The actual combination and redistribution conditions need their own review.
 
-Arms-length process separation with data passed over a pipe is the standard reading of the
-GPL's boundary, and it is the same shape as an editor invoking `gcc`. What breaks it is
-distribution: shipping the binary alongside your proprietary package, or fetching it into
-the package's own folder, makes it part of what you distribute.
+## Voices, phoneme routes and output
 
-**A test in the source repository enforces fact 2.** It fails if an engine binary,
-an `espeak-ng-data/` directory, or a `.onnx` / `.gguf` payload ever appears under
-`Assets/OfflineAINPC/`. It also fails if the boundary stops being documented — this file is
-part of the contract, not commentary on it.
+Voice files are a separate question: the dataset licence, fine-tune base and independent
+weight terms need review. A Chinese pinyin route or an unused espeak backend does not
+remove GPL-covered files that are still present in a distributed Piper folder. This
+audit did not run Piper or test language routing.
 
-## 3. If you are shipping a game with this plugin
+The [GNU output FAQ](https://www.gnu.org/licenses/gpl-faq.html#WhatCaseIsOutputGPL) generally
+distinguishes output from copyright in program code, with exceptions where protected
+content is copied. Independent recording, voice, model and other rights still apply.
+The process boundary does not establish that all generated audio owes no obligations.
 
-You may:
+## When to review again
 
-- Ship your game with Piper installed alongside it, **including `espeak-ng.dll`**, provided
-  you meet GPL-3.0 for that component (see below). This is the normal case and it is fine.
-- Keep your own game code proprietary. Your game is not a derivative of espeak-ng by
-  launching a process any more than it is a derivative of the OS.
+- When changing process/library integration or the communication protocol.
+- When adding an engine installer, changing its destination or exporting the package.
+- Before distributing an engine, native library, dictionary or model with a game.
+- When selecting a different Piper fork, phonemizer, voice or preprocessing model.
 
-To distribute `espeak-ng.dll` (or the whole Piper folder) inside your build, GPL-3.0 asks
-for three things:
-
-1. **Licence text.** Ship a copy of GPL-3.0 with your game and say which component it
-   covers. A `THIRD_PARTY_LICENSES` folder in the build directory is enough.
-2. **Written offer of source, or the source itself.** espeak-ng's corresponding source must
-   be available to anyone who received the binary — in practice, a URL to the exact upstream
-   release you shipped, kept alive for the period the licence requires. Pinning a release
-   tag matters: "latest master" is not corresponding source.
-3. **No further restrictions.** Your EULA must not forbid what the GPL permits for that
-   component (reverse engineering it, replacing it, redistributing it).
-
-You do **not** have to open your game. The obligation attaches to espeak-ng and to anything
-combined with it into one work — `piper.exe`, which is a separate program you are also
-merely redistributing.
-
-The escape hatch, if any of that is unacceptable: **do not ship Piper.** Point the plugin at
-another engine, at a system TTS, or at your own, and let players who want Piper install it
-themselves. Nothing in the plugin requires it.
-
-### Voice models are a separate question
-
-`*.onnx` voice files carry their own dataset licences, and they are *not* uniformly
-permissive — some forbid commercial use. GPL compliance for espeak-ng says nothing about
-them. Check each voice individually; [`VOICE_LICENCES.md`](VOICE_LICENCES.md) records what
-was verified per voice, and how.
-
-## 4. Chinese, and why it is not here
-
-Piper's Chinese voices phonemise through `pinyin`, not espeak. That was measured, not
-assumed: the same bytes through an espeak-typed voice and a pinyin-typed voice produce
-different `phoneme_type` handling. It does not change anything above — the
-espeak-ng binary is still inside the Piper distribution regardless of which voice you load,
-so shipping Piper ships espeak-ng even for a Chinese-only game.
-
-## 5. When to re-read this
-
-- Before any change that puts a file under `Assets/OfflineAINPC/`
-- Before adding an "install Piper for me" button anywhere in the editor tooling — a
-  downloader is fine, a downloader whose destination is inside the package is not
-- Before Asset Store submission, alongside `LICENSES/THIRD_PARTY_NOTICES.md`
-- If Piper ever replaces espeak-ng with a permissively licensed phonemiser, at which point
-  most of this document becomes history rather than constraint
+Existing working Piper configurations remain supported. A new engine choice needs its
+own exact inventory; this document does not grant blanket clearance to Qwen3-TTS or any
+other alternative. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

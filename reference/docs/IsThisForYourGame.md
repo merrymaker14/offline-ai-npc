@@ -4,36 +4,18 @@ Read this before you buy. It is written to talk the wrong buyer out of the purch
 a refund and a one-star review cost more than one sale is worth — and because the shape of
 this plugin genuinely suits some games and genuinely ruins others.
 
-Every number below was measured on real hardware and is reproducible with the tools in the
-package. Where something is unmeasured, it says so.
+
 
 ---
 
 ## The one thing to understand first
 
-**All characters share one local model server, and requests through it are serialised.**
+**Budget generation alongside the rest of your game.** Characters can share an LLMUnity server or use separate hosts.
+Concurrent requests on a shared server can queue; the server configuration and available hardware determine concurrency.
 
-Everything on this page follows from that sentence. A local language model is a single
-process holding several gigabytes of weights; you cannot run four of them, and requests to
-the one you have queue behind each other.
-
-Measured on an RTX 3060 Laptop (6 GB) with Qwen3-4B, median time to the player hearing the
-first word:
-
-| Situation | Median |
-|---|---|
-| One character, shipping path, nothing else generating | **2.0 s** |
-| One character, nothing else generating, waiting for the *whole* reply | 2.4 s |
-| Waiting for the whole reply **while other characters generate in the background** | **12.7 s** (measured once, in the demo project) |
-
-The two lower rows are the honest comparison — same measurement mode, so the difference is
-contention and nothing else: **background conversation costs roughly 5×**. The 2.0 s figure
-is the path a shipping game uses, where speech begins at the first finished sentence instead
-of at the end of the reply.
-
-No amount of tuning removes the 5×; it is the queue. The mitigation is in
-[Limitations](Limitations.md#concurrency): throttle background conversation while the player
-is speaking. The pattern is a few lines and it works, but you have to write it.
+Give the player's conversation priority. In a tavern, generate replies for the selected or nearby NPCs,
+and use recorded chatter for the room. For a companion, generate comments between encounters and use
+authored audio for an immediate combat alert. Test your chosen model and voice while the game is rendering.
 
 ---
 
@@ -49,14 +31,24 @@ answers. This is a dialogue system, not a barking system.
 detective scenes. Companion characters. VR social experiences. Immersive sims with a few
 deep NPCs rather than many shallow ones.
 
-**Games that already gate on hardware.** VR titles, mid-to-high spec desktop. Your audience
-has already accepted a GPU requirement, so the model's is not a new barrier.
+**Games with a defined hardware budget.** Plan memory and generation time alongside rendering.
+A small model can run on CPU; GPU use depends on your chosen setup. See [Hardware tiers](HardwareTiers.md).
 
-**Offline and privacy as requirements.** No API keys, no per-call billing, no rate limits,
-no network at all. Nothing leaves the machine, and there is no telemetry in this package —
-not even anonymous. If your game must work on a plane, in a school, or under a privacy
-policy that forbids sending player speech to a third party, that is the case this was
-built for.
+**Teams who work with an AI coding agent.** A character who answers differently every time is
+tiring to test by hand: press Play, walk over, talk, read, stop, change a number, repeat. The
+package ships an MCP server for the editor, off until you switch it on, through which Claude
+Code, Cursor or Codex can ask the character something, read exactly what the model was told,
+see why the door is or is not in its context, change it and ask again — see
+[Agent tools](AgentTools.md).
+
+**Offline and privacy as requirements.** With local engines: no API keys, no per-call
+billing, no rate limits, no network at all. Nothing of the player's leaves the machine, and
+there is no telemetry in this package — not even anonymous. If your game must work on a
+plane, in a school, or under a privacy policy that forbids sending player speech to a third
+party, that is the case this was built for. In the editor, the optional MCP server is the one
+exception, and yours to choose: it hands project data to the coding agent you connect, and
+an agent that runs its model in the cloud sends it on to its provider — see
+[Agent tools](AgentTools.md#safety).
 
 ---
 
@@ -64,19 +56,20 @@ built for.
 
 Plainly, so nobody is surprised after paying.
 
-**Mobile, web, or console.** Desktop only: Windows, macOS, Linux. This is not a roadmap
-item — it is a consequence of shipping a multi-gigabyte model and external speech processes.
+**Mobile, web, or console.** This package targets desktop games. Windows has been exercised;
+the complete macOS/Linux path still needs verification with matching native engines and
+a built player. Do not infer verified support from a dependency's platform list.
+Mobile, web and consoles are not currently supported.
 
-**Crowds of talking NPCs.** Several simultaneous conversations push a player's own reply
-from 2.0 s to a measured 12.7 s. A tavern of twenty characters chatting in the background
-is not something this can do, and throttling them means they are not really talking.
+**Unbounded background generation.** Keep ambient requests within a budget and pause them for the player.
+A populated tavern can combine generated conversations with recorded room chatter; measure how many
+active conversations your setup can sustain.
 
-**Real-time combat barks.** The latency budget for "enemy spots you and shouts" is a few
-hundred milliseconds. The median here is 2.0 s to first audio and the first line of a
-session takes about 2.1 s. Use audio clips for barks; they are better at it.
+**Immediate combat barks.** Use authored audio for an alert that must play as soon as an enemy spots the player.
+Generated speech can supply a companion's remarks between fights; measure its complete input-to-playback path.
 
-**Tightly authored narrative.** The grammar constrains the *shape* of a reply — that it is
-one sentence, that an action payload is well-formed — never its content. If a line must be
+**Tightly authored narrative.** The grammar constrains the *shape* of a reply — that an
+action payload is well-formed — never its content. If a line must be
 delivered word for word because the plot turns on it, a dialogue tree is the right tool.
 **A dialogue system and this plugin are complements, not competitors:** author the beats
 that matter, and use this for the space between them.
@@ -93,9 +86,9 @@ your design cannot tolerate an off-key line, this is the wrong tool.
 
 ## Fits with care
 
-**Many characters where only one is active at a time.** A house of six characters where you
-talk to one is fine. Six talking at once is not. The distinction is whether they generate
-simultaneously, not how many exist.
+**Many characters.** Six residents do not require six simultaneous requests. Activate the conversation
+the player is having and schedule the others. If your design needs simultaneous generation, test it
+with the actual server configuration, model, voice and game workload.
 
 **Games leaning on the deterministic half.** State axes, thresholds and events are exact
 every time and cost nothing; the language model is the expensive, probabilistic part. A
@@ -119,18 +112,20 @@ And a model file — 1 to 5 GB depending on tier, which you or your player downl
 package ships a catalog of licence-checked options and a download manager, but not the
 weights themselves.
 
-Speech synthesis is an external process you install (Piper, or an engine of your own for
-Japanese). The shipped Piper driver has been exercised on Windows only; on macOS or Linux
-it looks for a `piper` binary in the same folder, untested. If you redistribute Piper with your game, note
-that it links espeak-ng under GPL-3.0 — see [Licensing](Licensing.md), which explains
-exactly what that obliges and how to avoid it.
+Speech synthesis for the built-in language definitions is Qwen3-TTS (Apache-2.0 weights,
+MIT engine, ten languages, nothing copyleft): its Windows x64 CPU library comes with the
+package, and you download its two model files in Model Manager. Piper is a second engine, an
+external program you install. Only Windows has been exercised for either. If you choose Piper and redistribute
+it, note that it links espeak-ng under GPL-3.0 — see [Licensing](Licensing.md), which
+explains exactly what that obliges and how to avoid it.
 
 ---
 
 ## Still unsure?
 
-Open a sample scene, press Play, and read your own numbers: `Tools ▸ Offline AI NPC ▸ Live
-verification` times a real turn on *your* machine in Play mode — first audio, tier, layers
-on the GPU. Voices alone it can audition without Play mode.
+Open the Hello NPC sample from Welcome, press Play, and read your own numbers:
+`Tools ▸ Offline AI NPC ▸ Live verification` times real turns on *your* machine — to
+synthesized audio, with the tier and the layers on the GPU. It needs Play mode; outside it,
+**Advanced ▸ Speak one line (Piper)** plays a fixed Piper sentence with no model.
 "Will this run acceptably here" is the one question no cloud-based competitor can answer
 for you, and the only honest way to answer it is on your hardware.

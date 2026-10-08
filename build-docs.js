@@ -17,26 +17,31 @@ const saveFile = globalThis.saveFile ?? (async (path, text) => {
 
 const MONO = "ui-monospace,'Roboto Mono',SFMono-Regular,Menlo,Consolas,monospace";
 const SANS = "Roboto,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
-const C = { bg:'#08090A', panel:'#0B0D0E', b1:'#191D1F', b2:'#23282B', text:'#E6E9EA', bright:'#F2F4F5', body:'#C8CDCF', muted:'#9AA1A4', dim:'#6B7275', faint:'#4A5053', green:'#32CD32', greenB:'#1F3D22', amber:'#FF8C00' };
+const C = { bg:'#10171B', panel:'#162026', b1:'#26343C', b2:'#35474F', text:'#D8DEE0', bright:'#F5F0E6', body:'#CBD3D6', muted:'#A3B2B8', dim:'#72848C', faint:'#52636B', green:'#48C7BF', greenB:'#2F938D', amber:'#F2A65A' };
 
 const PAGES = [
   { f:'IsThisForYourGame', group:'Before you buy',      nav:'Is this for your game?' },
   { f:'GettingStarted',    group:'Getting it running',  nav:'Getting started' },
   { f:'BeginnerGuide',     group:'Getting it running',  nav:"Beginner's guide" },
   { f:'HardwareTiers',     group:'Getting it running',  nav:'Hardware tiers' },
+  { f:'UpgradingFrom1',    group:'Getting it running',  nav:'Upgrading from 1.0' },
   { f:'Dialogue',          group:'Building with it',    nav:'Dialogue' },
   { f:'Actions',           group:'Building with it',    nav:'Actions' },
   { f:'Languages',         group:'Building with it',    nav:'Languages' },
   { f:'State',             group:'Building with it',    nav:'State' },
   { f:'Perception',        group:'Building with it',    nav:'Perception' },
   { f:'Recipes',           group:'Building with it',    nav:'Recipes' },
+  { f:'AgentTools',        group:'Building with it',    nav:'Agent tools (MCP)' },
   { f:'InterviewDemo',     group:'Building with it',    nav:'The interview demo' },
+  { f:'CurrentModelUsage', group:'Models and voices',   nav:'Using the local models' },
+  { f:'QwenUsage',         group:'Models and voices',   nav:'Qwen speech' },
   { f:'Troubleshooting',   group:'When it breaks',      nav:'Troubleshooting' },
   { f:'Limitations',       group:'When it breaks',      nav:'Limitations' },
   { f:'Licensing',         group:'Licences and history',nav:'Licensing' },
   { f:'ThirdPartyNotices', group:'Licences and history',nav:'Third-party notices' },
   { f:'VoiceLicences',     group:'Licences and history',nav:'Voice licences' },
   { f:'ESPEAK_BOUNDARY',   group:'Licences and history',nav:'The espeak boundary' },
+  { f:'ReleaseHistory',    group:'Licences and history',nav:'Release history' },
   { f:'Changelog',         group:'Licences and history',nav:'Changelog' },
 ];
 const KNOWN = new Set(PAGES.map(p => p.f));
@@ -49,7 +54,9 @@ const ALIASES = { VOICE_LICENCES: 'VoiceLicences', THIRD_PARTY_NOTICES: 'ThirdPa
 const MISSING = new Map();
 
 const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const slug = s => s.toLowerCase().replace(/[\u0060*_]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+// As GitHub makes them, because the pages link to each other by those anchors: punctuation goes,
+// every space becomes a hyphen, so "at `timeScale = 0`" ends in "timescale--0".
+const slug = s => s.toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').trim().replace(/\s/g, '-');
 
 function inline(src) {
   const code = [];
@@ -62,18 +69,24 @@ function inline(src) {
   const A = (href, label, blank) => '<a href="' + href + '"' + (blank ? ' target="_blank" rel="noopener"' : '') + ' style="color:' + C.green + ';border-bottom:1px solid ' + C.greenB + '" style-hover="border-bottom-color:' + C.green + '">' + label + '</a>';
   s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, label, url) => {
     if (/^https?:/.test(url)) return A(url, label, true);
-    const mm = url.match(/([A-Za-z_]+)\.md(#[^)]*)?$/);
+    const mm = url.match(/([A-Za-z0-9_]+)\.md(#[^)]*)?$/);
     if (mm) {
       const file = ALIASES[mm[1]] || mm[1], anchor = mm[2] || '';
       if (KNOWN.has(file)) return A('./' + file + '.dc.html' + anchor, label, false);
       MISSING.set(file, (MISSING.get(file) || 0) + 1);
       return '<span title="Ships inside the package; not on the site yet" style="color:' + C.dim + ';border-bottom:1px dotted ' + C.b2 + '">' + label + '</span>';
     }
+    // Anything else that is not a place on this page is a file of the package the site does not carry.
+    if (!url.startsWith('#') && !/^[a-z]+:/i.test(url)) {
+      const file = url.split('/').pop();
+      MISSING.set(file, (MISSING.get(file) || 0) + 1);
+      return '<span title="Ships inside the package; not on the site" style="color:' + C.dim + ';border-bottom:1px dotted ' + C.b2 + '">' + label + '</span>';
+    }
     return A(url, label, false);
   });
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:' + C.bright + ';font-weight:500">$1</strong>');
   s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em style="color:' + C.text + ';font-style:italic">$2</em>');
-  s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => '<code style="font-family:' + MONO + ';font-size:0.88em;background:#121517;border:1px solid ' + C.b1 + ';padding:1px 5px;color:' + C.text + '">' + esc(code[+i]) + '</code>');
+  s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => '<code style="font-family:' + MONO + ';font-size:0.88em;background:#1B2830;border:1px solid ' + C.b1 + ';padding:1px 5px;color:' + C.text + '">' + esc(code[+i]) + '</code>');
   return s;
 }
 
@@ -87,6 +100,8 @@ function renderTable(rows) {
   out += '<tbody>' + body.map(r => '<tr>' + r.map((c, i) => '<td style="padding:13px 15px;font-size:14px;line-height:1.6;color:' + (i === 0 ? C.text : C.body) + ';border-top:1px solid ' + C.b1 + ';vertical-align:top">' + inline(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
   return out;
 }
+
+const ANCHORS = /^(\s*<a id="[^"]+"><\/a>\s*)+$/;
 
 function mdToHtml(md) {
   const lines = md.replace(/\r/g, '').split('\n');
@@ -110,8 +125,8 @@ function mdToHtml(md) {
     const h = line.match(/^(#{1,4})\s+(.*)$/);
     if (h) {
       const lvl = h[1].length, txt = h[2].trim(), id = slug(txt);
-      if (lvl === 1) out += '<h1 style="margin:0 0 20px;font-family:' + MONO + ';font-weight:500;font-size:clamp(23px,3.2vw,34px);line-height:1.2;letter-spacing:-0.01em;color:' + C.bright + ';text-wrap:pretty">' + inline(txt) + '</h1>';
-      else if (lvl === 2) out += '<h2 id="' + id + '" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid ' + C.b1 + ';font-family:' + MONO + ';font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.35;color:' + C.bright + ';text-wrap:pretty">' + inline(txt) + '</h2>';
+      if (lvl === 1) out += '<h1 style="margin:0 0 20px;font-weight:800;font-size:clamp(26px,3.6vw,40px);line-height:1.15;letter-spacing:-0.015em;color:' + C.bright + ';text-wrap:pretty">' + inline(txt) + '</h1>';
+      else if (lvl === 2) out += '<h2 id="' + id + '" style="margin:52px 0 18px;padding-top:22px;border-top:1px solid ' + C.b1 + ';font-weight:700;font-size:clamp(19px,2.2vw,23px);line-height:1.3;color:' + C.bright + ';text-wrap:pretty">' + inline(txt) + '</h2>';
       else out += '<h' + lvl + ' id="' + id + '" style="margin:34px 0 14px;font-family:' + MONO + ';font-weight:500;font-size:15px;line-height:1.45;letter-spacing:0.04em;color:' + C.text + ';text-wrap:pretty">' + inline(txt) + '</h' + lvl + '>';
       i++; continue;
     }
@@ -124,7 +139,7 @@ function mdToHtml(md) {
     if (/^>/.test(line)) {
       const buf = [];
       while (i < lines.length && /^>/.test(lines[i])) { buf.push(lines[i].replace(/^>\s?/, '')); i++; }
-      out += '<blockquote style="margin:26px 0;padding:18px 20px;background:rgba(50,205,50,0.04);border:1px solid ' + C.greenB + ';border-left:2px solid ' + C.green + '">' + mdToHtml(buf.join('\n')) + '</blockquote>';
+      out += '<blockquote style="margin:26px 0;padding:18px 20px;background:rgba(72,199,191,0.08);border:1px solid ' + C.greenB + ';border-left:2px solid ' + C.green + '">' + mdToHtml(buf.join('\n')) + '</blockquote>';
       continue;
     }
     if (/^\s*([-*]|\d+\.)\s+/.test(line)) {
@@ -139,8 +154,13 @@ function mdToHtml(md) {
       out += '<' + tag + ' style="margin:18px 0;padding-left:22px;color:' + C.body + ';font-size:15px;line-height:1.75">' + items.map(it => '<li style="margin:0 0 10px">' + it + '</li>').join('') + '</' + tag + '>';
       continue;
     }
+    // The package keeps old heading links alive with bare anchors; here they become targets, not text.
+    if (ANCHORS.test(line)) {
+      out += line.replace(/<a id="([^"]+)"><\/a>/g, (m, id) => '<span id="' + id + '" style="display:block;position:relative;top:-76px"></span>').trim();
+      i++; continue;
+    }
     const buf = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|\u0060\u0060\u0060|>|\s*\||\s*([-*]|\d+\.)\s|---+\s*$)/.test(lines[i])) { buf.push(lines[i].trim()); i++; }
+    while (i < lines.length && lines[i].trim() && !ANCHORS.test(lines[i]) && !/^(#{1,4}\s|\u0060\u0060\u0060|>|\s*\||\s*([-*]|\d+\.)\s|---+\s*$)/.test(lines[i])) { buf.push(lines[i].trim()); i++; }
     const para = buf.join(' ');
     if (/^!\[/.test(para)) out += '<figure style="margin:28px 0">' + inline(para) + '</figure>';
     else out += '<p style="margin:0 0 18px;font-size:15px;line-height:1.78;color:' + C.body + ';text-wrap:pretty">' + inline(para) + '</p>';
@@ -155,7 +175,17 @@ for (const p of PAGES) {
   const title = (md.match(/^#\s+(.+)$/m) || [, p.f])[1].trim();
   const after = md.split(/^#\s+.+$/m)[1] || '';
   const firstPara = after.split(/\n\s*\n/).map(s => s.trim()).filter(s => s && !s.startsWith('#') && !s.startsWith('!') && !s.startsWith('|') && !s.startsWith('>'))[0] || '';
-  meta[p.f] = { title, nav: p.nav, blurb: firstPara.replace(/\n/g, ' ').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*\u0060]/g, '').slice(0, 160) };
+  meta[p.f] = { title, nav: p.nav, blurb: blurbOf(firstPara.replace(/\n/g, ' ').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*\u0060]/g, '')) };
+}
+
+// Whole sentences while they fit; a page whose first sentence is too long is cut at a word.
+function blurbOf(text) {
+  const sentences = text.match(/[^.!?]+[.!?]+(?=\s|$)/g) || [];
+  let out = '';
+  for (const s of sentences) { if ((out + s).length > 200) break; out += s; }
+  if (out.trim()) return out.trim();
+  const head = text.slice(0, 170);
+  return (head.length < text.length ? head.slice(0, head.lastIndexOf(' ')) + '…' : head).trim();
 }
 
 const groups = [];
@@ -190,12 +220,12 @@ function chrome(inner, current) {
   const idx = PAGES.findIndex(p => p.f === current);
   const prev = idx > 0 ? PAGES[idx - 1] : null;
   const next = idx >= 0 && idx < PAGES.length - 1 ? PAGES[idx + 1] : null;
-  const card = (p, isNext) => '<a href="./' + p.f + '.dc.html" style="flex:1 1 200px;background:' + C.panel + ';padding:18px 20px;display:flex;flex-direction:column;gap:7px' + (isNext ? ';text-align:right;align-items:flex-end' : '') + '" style-hover="background:#101314"><span style="font-family:' + MONO + ';font-size:10px;letter-spacing:0.18em;color:' + C.faint + '">' + (isNext ? 'NEXT &rarr;' : '&larr; PREVIOUS') + '</span><span style="font-family:' + MONO + ';font-size:13px;color:' + C.text + '">' + meta[p.f].nav + '</span></a>';
+  const card = (p, isNext) => '<a href="./' + p.f + '.dc.html" style="flex:1 1 200px;background:' + C.panel + ';padding:18px 20px;display:flex;flex-direction:column;gap:7px' + (isNext ? ';text-align:right;align-items:flex-end' : '') + '" style-hover="background:#1B2830"><span style="font-family:' + MONO + ';font-size:10px;letter-spacing:0.18em;color:' + C.faint + '">' + (isNext ? 'NEXT &rarr;' : '&larr; PREVIOUS') + '</span><span style="font-family:' + MONO + ';font-size:13px;color:' + C.text + '">' + meta[p.f].nav + '</span></a>';
   const foot = (prev || next) ? '\n      <div style="display:flex;flex-wrap:wrap;gap:1px;background:' + C.b1 + ';border:1px solid ' + C.b1 + ';margin-top:64px">' + (prev ? card(prev, false) : '') + (next ? card(next, true) : '') + '</div>' : '';
   return HEAD + '\n<div style="background:' + C.bg + ';min-height:100vh">\n' +
-'  <header style="position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:14px clamp(16px,4vw,44px);border-bottom:1px solid ' + C.b1 + ';background:rgba(8,9,10,0.94)">\n' +
-'    <div style="display:flex;align-items:baseline;gap:10px;font-family:' + MONO + ';min-width:0">\n' +
-'      <a href="../Offline AI NPC - Landing.dc.html" style="font-size:13px;font-weight:700;letter-spacing:0.16em;color:' + C.text + ';white-space:nowrap" style-hover="color:' + C.green + '">OFFLINE&#8202;AI&#8202;NPC</a>\n' +
+'  <header style="position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:14px clamp(16px,4vw,44px);border-bottom:1px solid ' + C.b1 + ';background:#10171B">\n' +
+'    <div style="display:flex;align-items:center;gap:10px;font-family:' + MONO + ';min-width:0">\n' +
+'      <a href="../Offline AI NPC - Landing.dc.html" style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:0.16em;color:' + C.bright + ';white-space:nowrap" style-hover="color:' + C.green + '"><img src="../assets/brand.png" alt="" width="28" height="28" style="display:block">OFFLINE&#8202;AI&#8202;NPC</a>\n' +
 '      <a href="./Documentation.dc.html" style="font-size:11px;letter-spacing:0.14em;color:' + C.dim + '" style-hover="color:' + C.text + '">/ DOCS</a>\n' +
 '    </div>\n' +
 '    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:clamp(12px,2.4vw,24px);font-family:' + MONO + ';font-size:11px;letter-spacing:0.14em">\n' +
@@ -210,19 +240,15 @@ function chrome(inner, current) {
 
 for (const p of PAGES) await saveFile('docs/' + p.f + '.dc.html', chrome(mdToHtml(sources[p.f]), p.f));
 
-const indexInner = '      <h1 style="margin:0 0 16px;font-family:' + MONO + ';font-weight:500;font-size:clamp(24px,3.4vw,36px);letter-spacing:-0.01em;color:' + C.bright + '">Documentation</h1>\n' +
-'      <p style="margin:0;font-size:15px;line-height:1.78;color:' + C.body + ';max-width:64ch;text-wrap:pretty">The same pages that ship inside the package, rendered from the same files. Every latency figure comes from one stated machine and is reproducible with the tools in the download.</p>\n' +
+const indexInner = '      <h1 style="margin:0 0 16px;font-weight:800;font-size:clamp(26px,3.6vw,40px);letter-spacing:-0.015em;color:' + C.bright + '">Documentation</h1>\n' +
+'      <p style="margin:0;font-size:15px;line-height:1.78;color:' + C.body + ';max-width:64ch;text-wrap:pretty">The same pages that ship inside the package, rendered from the same files. In the package they also come in Russian, Spanish and Simplified Chinese.</p>\n' +
 '      <div style="display:flex;flex-direction:column;gap:40px;margin-top:48px">\n' +
 groups.map(g => '        <div style="display:flex;flex-direction:column;gap:10px">\n' +
 '          <span style="font-family:' + MONO + ';font-size:10px;letter-spacing:0.2em;color:' + C.green + '">' + g.name.toUpperCase() + '</span>\n' +
 '          <div style="display:flex;flex-direction:column;gap:1px;background:' + C.b1 + ';border:1px solid ' + C.b1 + '">\n' +
-g.items.map(it => '            <a href="./' + it.f + '.dc.html" style="background:' + C.panel + ';padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#101314"><span style="font-family:' + MONO + ';font-size:15px;font-weight:500;letter-spacing:0.03em;color:' + C.bright + '">' + meta[it.f].title + '</span><span style="font-size:14px;line-height:1.65;color:' + C.muted + ';text-wrap:pretty">' + inline(meta[it.f].blurb) + '&hellip;</span></a>').join('\n') +
+g.items.map(it => '            <a href="./' + it.f + '.dc.html" style="background:' + C.panel + ';padding:22px 24px;display:flex;flex-direction:column;gap:9px" style-hover="background:#1B2830"><span style="font-size:16px;font-weight:700;color:' + C.bright + '">' + meta[it.f].title + '</span><span style="font-size:14px;line-height:1.65;color:' + C.muted + ';text-wrap:pretty">' + inline(meta[it.f].blurb) + '</span></a>').join('\n') +
 '\n          </div>\n        </div>').join('\n') +
-'\n      </div>\n' +
-'      <div style="margin-top:56px;border:1px dashed ' + C.b2 + ';padding:20px 22px;display:flex;flex-direction:column;gap:10px">\n' +
-'        <span style="font-family:' + MONO + ';font-size:10px;letter-spacing:0.18em;color:' + C.amber + '">NOT ON THE SITE YET</span>\n' +
-'        <p style="margin:0;font-size:14px;line-height:1.7;color:' + C.muted + ';max-width:66ch;text-wrap:pretty">' + [...MISSING.keys()].sort().join(', ') + ' &mdash; referenced by the pages above and shipped inside the package, but not on the site yet. Links to them read as plain text rather than breaking.</p>\n' +
-'      </div>';
+'\n      </div>';
 await saveFile('docs/Documentation.dc.html', chrome(indexInner, null));
 
 log('pages: ' + PAGES.length + ' + index');

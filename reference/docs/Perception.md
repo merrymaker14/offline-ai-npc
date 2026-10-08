@@ -6,8 +6,8 @@ Make an object noticeable: add **AI Point Of Interest** to it. That is the whole
 
 Select a character and the radius is a handle you can drag. Everything inside it is a
 candidate; what reaches the prompt is the most salient handful — distance, priority, facing
-and recent interaction weighed together — recomputed a few times a second and again just
-before each turn.
+and recent interaction weighed together — recomputed a few times a second, and once more
+by your dialogue code just before each turn.
 
 The scene view answers two different questions depending on whether the game is running:
 
@@ -16,7 +16,7 @@ The scene view answers two different questions depending on whether the game is 
   you are placing furniture, line of sight and priority are not, and a number invented in
   edit mode would be a guess wearing the clothes of a measurement.
 - **Playing** — the objects actually in context, each with the score that put it there,
-  the line thicker for the ones in view. This is the answer to "why is she talking about
+  the line thicker for the ones in view. This is the answer to "why is the character talking about
   the bookshelf and not the bed".
 
 
@@ -43,11 +43,17 @@ whole scene at once, and at runtime by `PoiRegistry.DuplicateIds()`. A name the 
 cannot hold — «Кружка», 「マグカップ」 — still gets a stable id (`poi_` plus a short hash), so
 an object never silently fails to register.
 
+Long derived names are shortened to the 48-character grammar limit with a stable hash
+suffix; existing valid authored ids keep their spelling. Each recompute refreshes changed
+scores, distances and order without raising `Changed` for a mere rank change. Replacing a
+pooled instance under the same id updates the live target and raises that event. Context
+rendering also excludes an object disabled since the last snapshot.
+
 **A point of interest is also an action target.** It implements `IActionTarget` and
 `IAimTarget`, so a verb can be aimed at it without adding an Action Target component as well —
 see [Actions](Actions.md#register-a-target). The reverse does not hold: an Action Target is
-addressable but not perceived, so the character can be told to act on it and will never
-mention it unprompted.
+addressable but not automatically included in the perception context. It can be offered
+as an action target; this does not prevent the model from mentioning it in ordinary prose.
 
 ## The character
 
@@ -69,8 +75,8 @@ Weights are serialized data. Two rules are not negotiable:
   is the token budget of `DescribeContext` (100 by default): when the description does not
   fit, the block is cut and says so.
 
-Facing is soft by contrast — something behind her is less salient, not invisible, because
-she can turn her head.
+Facing is soft by contrast — something behind the character is less salient, not invisible, because
+a head can turn.
 
 ## How it reaches the model
 
@@ -80,12 +86,30 @@ The result of one recompute produces two things at once:
 Nearby: a mug of cocoa (still warm) [mug], the record player (playing) [record_player].
 ```
 
-…and the target enum of the action grammar, built from that same list. So the character
-is **physically unable** to name an object it cannot currently see, and what it is told
-about can never disagree with what it may refer to.
+…and the target enum of the action grammar, built from that same list. When this grammar
+is successfully applied, a valid completed action's `action.target` is restricted to the
+rendered shortlist. **Free-form prose is not restricted to those objects**: perception
+supplies context, not a guarantee against invented scenery. This is one turn's captured
+view; objects can move, be disabled or be replaced afterwards, so execution still needs
+current target and gameplay checks.
 
 The block rides with the turn and is never written to the conversation transcript: it
 describes one moment, and a transcript would repeat it later as though it were still true.
+
+Your dialogue code makes the hand-over. Just before generating:
+
+```csharp
+perception.Recompute();                                      // the view of this moment
+string nearby = perception.DescribeContext(languageCode);    // "Nearby: a mug of cocoa [mug], …"
+string turnText = nearby + "\n" + playerLine;                // the user message, not the system prompt
+var turn = new ActionTurn(perception.Schema, dispatcher, sink, npcId, languageCode);
+```
+
+The system prompt is what the inference engine caches, so a block that changes every turn
+belongs with the player's line. `perception.Schema` is the action schema whose targets are
+exactly the ids that block named; the rest of the turn is in [Actions](Actions.md). The
+Hello NPC sample does not read perception; the World Aware sample shows the block and the
+schema without a model.
 
 **When there is more than fits.** The query keeps the top entries by salience and closes the
 list with a per-language tail — `…, a lamp [lamp], and other things.` — so the model knows
@@ -121,11 +145,28 @@ so "when the character opens this door, play the animation" lives on the door.
 PoiBulkAttach.AttachToLayer("Props");     // or AttachToTag("Interactable")
 ```
 
-Idempotent. Ids are de-duplicated against the live registry and within the call; an object
-that is disabled at that moment is not seen, so attach after the scene has settled.
+Idempotent. Ids are de-duplicated against the live registry and within the call.
+`AttachToLayer` includes inactive objects unless you pass `includeInactive: false`;
+`AttachToTag` sees only active ones — that is how tag lookup works in Unity — so call it
+after the scene has settled.
 
 ## Debugging
 
 * Select the NPC: the perception radius and lines to everything currently in context.
-* `perception.Explain(poi)` answers "why did she not mention the mug?" with the actual
+* `perception.Explain(poi)` answers "why did the character not mention the mug?" with the actual
   reason — too far, behind which object, or simply outranked.
+
+## Snapshot identity and registry callbacks
+
+An item captures its id when created. `Initialize` on a live point of interest does not
+change ids in a snapshot you already hold; the next query recompute can detect the new
+identity and raise `Changed`. The snapshot copies the supplied array and exposes its
+items through a read-only list. `Poi` itself remains a live reference: transforms,
+descriptions and enabled state are not frozen. Context rendering excludes a reference
+whose live id or registry entry no longer matches the captured id until it is recomputed.
+
+If a registry observer initializes or enables/disables that object inside a notification,
+the newest intent owns its registration. An older callback unwinding cannot restore an
+obsolete identity or remove the newer registration. Existing public initialization and
+registry methods retain their signatures. Check actual pooling and scene transitions in
+your target player before release.
