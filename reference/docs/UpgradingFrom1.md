@@ -517,11 +517,18 @@ pipeline called them, select your own game assets explicitly and use
 path list. Configure your screenshots through `TextureImporter`, and open your own editor windows
 with `EditorWindow.GetWindow<T>(utility: true)`. Publisher menus stay in the development repository.
 
-Importing 1.1 over 1.0 does not remove files absent from the new package. The old publisher
-helper `Assets/OfflineAINPC/Editor/Packaging/PackageExport.cs` can therefore keep its
-**Tools ▸ Offline AI NPC ▸ Export .unitypackage…** menu. If you no longer need the original
-1.0 helper, remove that old file. Keep the imported `DocumentationAssets.cs` compatibility
-constants and your own editor wrappers.
+Importing 1.1 over 1.0 does not remove files absent from the new package. Two files of 1.0
+stay behind, and both still compile:
+
+- The old publisher helper `Assets/OfflineAINPC/Editor/Packaging/PackageExport.cs` keeps its
+  **Tools ▸ Offline AI NPC ▸ Export .unitypackage…** menu. If you no longer need the original
+  1.0 helper, remove that old file.
+- `Assets/OfflineAINPC/Editor/Inspectors/TraitPresetDrawer.cs` keeps drawing each row of a
+  Trait Preset on one line — the axis and its three numbers, as in 1.0. A fresh install of 1.1
+  draws the same four fields under their names. Both edit the same values; remove the old file
+  if you want the 1.1 inspector.
+
+Keep the imported `DocumentationAssets.cs` compatibility constants and your own editor wrappers.
 
 ## Custom preset catalog and downgrade
 
