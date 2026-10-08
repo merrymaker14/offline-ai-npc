@@ -1,6 +1,6 @@
 # Licensing
 
-Offline AI NPC's own code uses the Asset Store licence. The language model, speech models, engines and native libraries have their own licences. Keep the licence texts and required notices for the exact files you include in your game.
+Offline AI NPC's own code is licensed under the terms of the store you got it from: the [Standard Unity Asset Store EULA](https://unity.com/legal/as-terms) for a copy from the Unity Asset Store, the [Fab Standard License](https://www.fab.com/eula) for a copy from Fab. The language model, speech models, engines and native libraries have their own licences. Keep the licence texts and required notices for the exact files you include in your game.
 
 ### The included Qwen DLL
 
