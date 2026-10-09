@@ -95,6 +95,14 @@
   .part h3 { margin: 0 0 6px; font-size: 16px; color: var(--ink); }
   .part p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--muted); }
 
+  /* start */
+  .step { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 28px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .step h3 { flex: 0 1 clamp(210px, 27%, 310px); margin: 0; font-size: 17px; font-weight: 700; color: var(--ink); }
+  .step h3 b { display: inline-block; min-width: 2.4em; font-family: var(--mono); font-weight: 500; font-size: 13px; letter-spacing: 0.1em; color: var(--teal); }
+  .step p { flex: 1 1 min(100%, 420px); margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--muted); }
+  .step p b { font-weight: 600; color: var(--text); }
+  .steps + .note { margin-top: clamp(20px, 3vw, 28px); }
+
   /* measured */
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(20px, 3vw, 34px); }
   .panel + .panel { margin-top: 14px; }
@@ -161,6 +169,7 @@
   <div class="wrap">
     <a class="mark" href="#top"><img src="./assets/brand.png" alt=""> OFFLINE&#8202;AI&#8202;NPC <small>/ PLUGIN FOR UNITY 6</small></a>
     <nav class="nav">
+      <a href="#start">GET STARTED</a>
       <a href="#new">WHAT'S NEW</a>
       <a href="#measured">MEASURED</a>
       <a href="#demo">DEMO</a>
@@ -195,9 +204,25 @@
   <div><b>4</b><span>editor languages: EN &middot; RU &middot; ES &middot; 简体中文</span></div>
 </div>
 
+<section class="block" id="start">
+  <div class="wrap">
+    <div class="head"><span class="n">[ 01 ]</span><h2>Five steps, no code</h2></div>
+    <p class="intro">From import to a character that answers, without writing a line. Voice and microphone are steps four and five &mdash; add them when you want them.</p>
+    <div class="steps">
+      <div class="step"><h3><b>01</b>Install and import</h3><p>Install <b>LLM for Unity</b> (free, version 3.0.3 or newer), then import this package. The <b>Welcome</b> window opens by itself and checks the dependencies.</p></div>
+      <div class="step"><h3><b>02</b>Set up first dialogue</h3><p>Take the model suggested for this computer &mdash; the Model Manager downloads it &mdash; preview what will change in the scene, and apply. One Undo takes it back.</p></div>
+      <div class="step"><h3><b>03</b>Press Play</h3><p>Type a question, press Enter. The character answers in a subtitle.</p></div>
+      <div class="step"><h3><b>04</b>Give her a voice</h3><p>Download two model files in the Model Manager and the same character speaks, in any of the ten languages.</p></div>
+      <div class="step"><h3><b>05</b>Talk instead of typing</h3><p>Install whisper.unity, add the <b>Push To Talk</b> and <b>Whisper Speech Recognition</b> components, then hold <b>V</b> and speak.</p></div>
+    </div>
+    <div class="note"><b>IF SOMETHING IS MISSING</b>The manual walks through each of these steps, and <b style="color:var(--text);font-family:inherit;font-size:inherit;letter-spacing:0;margin:0;font-weight:600">Check my setup</b> names what is missing and how to fix it.</div>
+    <div class="cta"><a class="btn primary" href="./docs/GettingStarted.dc.html">GETTING STARTED</a><a class="btn" href="./docs/BeginnerGuide.dc.html">BEGINNER'S GUIDE</a></div>
+  </div>
+</section>
+
 <section class="block" id="new">
   <div class="wrap">
-    <div class="head"><span class="n">[ 01 ]</span><h2>New in 1.1</h2></div>
+    <div class="head"><span class="n">[ 02 ]</span><h2>New in 1.1</h2></div>
     <div class="grid3">
       <div class="card"><span class="tag">VOICE</span><h3>Ten languages, built in</h3><p>Qwen3-TTS now runs as a library inside the game. Download two model files in the Model Manager and the voice speaks English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish or Italian in one consistent voice. Nothing to compile, nothing to launch. Piper stays supported.</p></div>
       <div class="card"><span class="tag">SETUP</span><h3>First dialogue in minutes</h3><p>A guided setup picks one model for this computer, shows what it will change in the scene and applies it with Undo. Start with a typed line &mdash; voice and microphone are optional and come later.</p></div>
@@ -211,7 +236,7 @@
 
 <section class="block" id="inside">
   <div class="wrap">
-    <div class="head"><span class="n">[ 02 ]</span><h2>Six parts, one character</h2></div>
+    <div class="head"><span class="n">[ 03 ]</span><h2>Six parts, one character</h2></div>
     <p class="intro">Each part works without the others. A character that only answers typed lines needs two of them; one that listens, sees the room, keeps a mood and acts on it uses all six.</p>
     <div class="parts">
       <div class="part"><img src="./assets/icons/dialogue.png" alt=""><h3>Dialogue</h3><p>Streamed replies: she starts speaking at the first finished sentence, not at the end of the answer.</p></div>
@@ -226,7 +251,7 @@
 
 <section class="block" id="measured">
   <div class="wrap">
-    <div class="head"><span class="n">[ 03 ]</span><h2>Measured, not claimed</h2></div>
+    <div class="head"><span class="n">[ 04 ]</span><h2>Measured, not claimed</h2></div>
     <p class="intro">One laptop &mdash; RTX 3060, 6&nbsp;GB &mdash; on 5 October 2026. The samples are small and are stated as such; none of it is a promise about your machine.</p>
 
     <div class="panel">
@@ -255,7 +280,7 @@
 
 <section class="block" id="demo">
   <div class="wrap">
-    <div class="head"><span class="n">[ 04 ]</span><h2>The demo: The Interview</h2></div>
+    <div class="head"><span class="n">[ 05 ]</span><h2>The demo: The Interview</h2></div>
     <p class="intro">One candidate, eighteen questions, a form to sign. Ask her anything in ten languages &mdash; typed or spoken &mdash; and decide whether her answers match her file. Free, Windows; the language model is fetched once on first run and everything after that is local.</p>
     <div class="shots">
       <figure class="shot wide"><img src="./assets/demo/desk.jpg" width="1920" height="1080" alt="The interview: the log on the left, the candidate, the clearance form on the right" loading="lazy"><figcaption>THE DESK &mdash; HER ANSWERS ON THE LEFT, HER FILE ON THE RIGHT</figcaption></figure>
@@ -268,7 +293,7 @@
 
 <section class="block" id="limits">
   <div class="wrap">
-    <div class="head"><span class="n">[ 05 ]</span><h2>What it does not do</h2></div>
+    <div class="head"><span class="n">[ 06 ]</span><h2>What it does not do</h2></div>
     <p class="intro">Three limits worth knowing before the purchase rather than after it.</p>
     <div class="limit"><h3>DESKTOP ONLY</h3><p>It needs a desktop GPU and desktop memory, and the bundled voice library is Windows x64. There is no phone build, no web build and no cloud fallback to hide behind &mdash; that absence is the point of the product.</p></div>
     <div class="limit"><h3>ONE INFERENCE QUEUE</h3><p>Every character shares one model on one machine. A tavern of six people all answering at once is not what this does; a scene with one or two speaking characters is.</p></div>
@@ -278,7 +303,7 @@
 
 <section class="block" id="get">
   <div class="wrap">
-    <div class="head"><span class="n">[ 06 ]</span><h2>Get it</h2></div>
+    <div class="head"><span class="n">[ 07 ]</span><h2>Get it</h2></div>
     <div class="get">
       <div>
         <div class="price">89<small>USD</small></div>
